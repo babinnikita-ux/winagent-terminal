@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { ShortcutBinding, ShortcutAction } from '../store/settings-slice';
 import { splitNode, removeLeaf, getAllPaneIds, findLeaf, adjustPaneRatio } from '../store/split-utils';
 import { PaneId, SplitNode } from '../../shared/types';
-import { trimTrailingWhitespace } from '../utils/copy-text';
+import { copyTerminalText } from '../utils/copy-text';
 import { v4 as uuid } from 'uuid';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -227,7 +227,10 @@ export function useKeyboardShortcuts(
       // Same line-end trim as the terminal Ctrl+C path (issue #102) — DOM
       // selections over xterm rows carry the same ConPTY padding spaces.
       const selection = window.getSelection()?.toString();
-      if (selection) navigator.clipboard.writeText(trimTrailingWhitespace(selection));
+      if (selection) {
+        void copyTerminalText(selection, (text) => window.wmux.clipboard.writeText(text))
+          .catch(() => {});
+      }
     };
 
     const pasteIntoFocusedTerminal = () => {

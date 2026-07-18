@@ -9,9 +9,10 @@
 // present in the active language falls back to English, then to the literal key,
 // so partial translations never render blank.
 
-export type Language = 'en' | 'fr' | 'zh';
+export type Language = 'en' | 'fr' | 'ru' | 'zh';
 
 export const LANGUAGES: ReadonlyArray<{ code: Language; label: string }> = [
+  { code: 'ru', label: 'Русский' },
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'Français' },
   { code: 'zh', label: '中文' },
@@ -95,6 +96,17 @@ const en: Dict = {
   'ctx.statusAuto': 'Auto (detected)',
   'ctx.statusRunning': 'Pin as Running',
   'ctx.statusIdle': 'Pin as Idle',
+  'chat.controls.label': 'Terminal chat controls',
+  'chat.title.terminal': 'Terminal chat',
+  'chat.title.claude': 'Claude Code',
+  'chat.title.codex': 'Codex',
+  'chat.copy.hint': 'Select text, then press Ctrl+C',
+  'chat.copy.action': 'Copy',
+  'chat.paste.action': 'Paste',
+  'chat.copy.done': 'Copied',
+  'chat.copy.empty': 'Select text first',
+  'chat.copy.failed': 'Copy failed',
+  'terminal.copyMode.hint': 'COPY MODE — Arrow keys to move, Shift+arrows to select, Enter to copy, Esc to exit',
 };
 
 const fr: Dict = {
@@ -163,6 +175,81 @@ const fr: Dict = {
   'ctx.statusIdle': 'Épingler « Inactif »',
 };
 
+const ru: Dict = {
+  'settings.title': 'Настройки',
+  'settings.tab.general': 'Основные',
+  'settings.tab.sidebar': 'Боковая панель',
+  'settings.tab.workspace': 'Рабочая область',
+  'settings.tab.terminal': 'Терминал',
+  'settings.tab.ai': 'ИИ',
+  'settings.tab.notifications': 'Уведомления',
+  'settings.tab.browser': 'Браузер',
+  'settings.tab.profiles': 'Профили',
+  'settings.tab.shortcuts': 'Горячие клавиши',
+  'settings.tab.help': 'Справка',
+  'settings.general.languageSection': 'Язык',
+  'settings.general.language': 'Язык интерфейса',
+  'settings.general.languageHint': 'Изменения применяются сразу. Непереведённый текст отображается на английском.',
+  'settings.general.appearanceSection': 'Оформление',
+  'settings.general.uiTheme': 'Тема приложения',
+  'settings.general.uiTheme.system': 'Как в системе',
+  'settings.general.uiTheme.dark': 'Тёмная',
+  'settings.general.uiTheme.light': 'Светлая',
+  'settings.general.appearanceHint': 'Настраивает боковую панель, вкладки и рамку окна. Цвета терминала задаются отдельно.',
+  'settings.general.customBgSection': 'Свой фон',
+  'settings.general.customBgEnable': 'Включить свой фон',
+  'settings.general.customBgCss': 'Фон (CSS)',
+  'settings.general.customBgPreset': 'Пресет',
+  'settings.general.customBgPreset.none': 'Выберите пресет…',
+  'settings.general.customBgOpacity': 'Непрозрачность терминала',
+  'settings.general.customBgHint': 'Поддерживается любой CSS-фон: цвет, градиент или изображение url(…).',
+  'palette.placeholder': 'Введите команду или запрос…',
+  'palette.empty': 'Ничего не найдено',
+  'palette.category.actions': 'Действия',
+  'palette.category.commands': 'Команды',
+  'palette.category.workspaces': 'Рабочие области',
+  'palette.category.themes': 'Темы',
+  'palette.openMarkdown': 'Открыть файл Markdown…',
+  'palette.current': 'текущая',
+  'titlebar.help': 'Помощь / обучение',
+  'titlebar.devtools': 'Открыть инструменты разработчика',
+  'titlebar.settings': 'Настройки (Ctrl+,)',
+  'titlebar.updateAvailable': 'Доступно обновление',
+  'titlebar.updateDownload': 'Нажмите, чтобы скачать с GitHub',
+  'settings.help.about': 'О WinAgent Terminal',
+  'settings.help.version': 'Версия',
+  'settings.help.reportIssue': 'Сообщить о проблеме',
+  'settings.help.website': 'Сайт',
+  'settings.help.hint': 'Нашли ошибку или хотите предложить улучшение? Откройте issue на GitHub.',
+  'ctx.pin': 'Закрепить рабочую область',
+  'ctx.unpin': 'Открепить рабочую область',
+  'ctx.rename': 'Переименовать рабочую область…',
+  'ctx.color': 'Цвет рабочей области',
+  'ctx.clearColor': 'Убрать цвет',
+  'ctx.moveUp': 'Переместить выше',
+  'ctx.moveDown': 'Переместить ниже',
+  'ctx.moveTop': 'Переместить в начало',
+  'ctx.close': 'Закрыть рабочую область',
+  'ctx.closeOthers': 'Закрыть другие рабочие области',
+  'ctx.markRead': 'Отметить как прочитанное',
+  'ctx.markUnread': 'Отметить как непрочитанное',
+  'ctx.status': 'Индикатор состояния',
+  'ctx.statusAuto': 'Автоматически',
+  'ctx.statusRunning': 'Закрепить «Выполняется»',
+  'ctx.statusIdle': 'Закрепить «Ожидание»',
+  'chat.controls.label': 'Управление терминальным чатом',
+  'chat.title.terminal': 'Терминальный чат',
+  'chat.title.claude': 'Claude Code',
+  'chat.title.codex': 'Codex',
+  'chat.copy.hint': 'Выделите текст и нажмите Ctrl+C',
+  'chat.copy.action': 'Копировать',
+  'chat.paste.action': 'Вставить',
+  'chat.copy.done': 'Скопировано',
+  'chat.copy.empty': 'Сначала выделите текст',
+  'chat.copy.failed': 'Не удалось скопировать',
+  'terminal.copyMode.hint': 'РЕЖИМ КОПИРОВАНИЯ — стрелки: перемещение, Shift+стрелки: выделение, Enter: копировать, Esc: выйти',
+};
+
 const zh: Dict = {
   'settings.title': '设置',
   'settings.tab.general': '常规',
@@ -227,7 +314,7 @@ const zh: Dict = {
   'ctx.statusIdle': '固定为空闲',
 };
 
-const DICTS: Record<Language, Dict> = { en, fr, zh };
+const DICTS: Record<Language, Dict> = { en, fr, ru, zh };
 
 /** Translate a key for an explicit language (English → key fallback chain). */
 export function translate(lang: Language, key: string, fallback?: string): string {

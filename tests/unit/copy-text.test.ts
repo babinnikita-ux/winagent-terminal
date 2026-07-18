@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { trimTrailingWhitespace } from '../../src/renderer/utils/copy-text';
+import { describe, it, expect, vi } from 'vitest';
+import { copyTerminalText, trimTrailingWhitespace } from '../../src/renderer/utils/copy-text';
 
 describe('trimTrailingWhitespace (issue #102)', () => {
   it('strips trailing spaces from every line', () => {
@@ -36,5 +36,21 @@ describe('trimTrailingWhitespace (issue #102)', () => {
 
   it('does not touch interior whitespace', () => {
     expect(trimTrailingWhitespace('foo  bar  \n')).toBe('foo  bar\n');
+  });
+});
+
+describe('copyTerminalText', () => {
+  it('trims terminal padding before writing to the clipboard', async () => {
+    const writeText = vi.fn();
+
+    await expect(copyTerminalText('answer   \nnext\t', writeText)).resolves.toBe(true);
+    expect(writeText).toHaveBeenCalledWith('answer\nnext');
+  });
+
+  it('does not write an empty selection', async () => {
+    const writeText = vi.fn();
+
+    await expect(copyTerminalText('', writeText)).resolves.toBe(false);
+    expect(writeText).not.toHaveBeenCalled();
   });
 });

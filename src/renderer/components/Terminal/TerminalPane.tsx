@@ -4,6 +4,8 @@ import FindBar from './FindBar';
 import CopyMode from './CopyMode';
 import '../../styles/terminal.css';
 import { AgentPreset } from '../../../shared/types';
+import { copyTerminalText } from '../../utils/copy-text';
+import { useT } from '../../i18n';
 
 interface TerminalPaneProps {
   surfaceId?: string;
@@ -36,9 +38,12 @@ export default function TerminalPane({
   onFindBarClose,
   copyModeActive = false,
 }: TerminalPaneProps) {
-  const { terminalRef, searchAddonRef } = useTerminal({ surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands, agentPreset, resumeAgentSession });
+  const { terminalRef, xtermRef, searchAddonRef } = useTerminal({ surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands, agentPreset, resumeAgentSession });
 
   const [_lastQuery, setLastQuery] = useState('');
+  const [copyMessage, setCopyMessage] = useState('');
+  const copyMessageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useT();
 
   // Latest values mirrored into refs so the global F3 / Shift+F3 listener (issue
   // #64) can read them without re-subscribing on every keystroke or focus change.
@@ -93,8 +98,72 @@ export default function TerminalPane({
     onFindBarClose?.();
   }, [searchAddonRef, onFindBarClose]);
 
+  const showCopyMessage = useCallback((message: string) => {
+    if (copyMessageTimerRef.current) clearTimeout(copyMessageTimerRef.current);
+    setCopyMessage(message);
+    copyMessageTimerRef.current = setTimeout(() => setCopyMessage(''), 1800);
+  }, []);
+
+  useEffect(() => () => {
+    if (copyMessageTimerRef.current) clearTimeout(copyMessageTimerRef.current);
+  }, []);
+
+  const handleCopy = useCallback(async () => {
+    const terminal = xtermRef.current;
+    if (!terminal) return;
+    try {
+      const copied = await copyTerminalText(terminal.getSelection(), (text) => window.wmux.clipboard.writeText(text));
+      if (copied) {
+        terminal.clearSelection();
+        terminal.focus();
+        showCopyMessage(t('chat.copy.done'));
+      } else {
+        showCopyMessage(t('chat.copy.empty'));
+      }
+    } catch {
+      showCopyMessage(t('chat.copy.failed'));
+    }
+  }, [showCopyMessage, t, xtermRef]);
+
+  const handlePaste = useCallback(() => {
+    if (!surfaceId) return;
+    document.dispatchEvent(new CustomEvent('wmux:paste-terminal', { detail: { surfaceId } }));
+  }, [surfaceId]);
+
+  const chatTitle = agentPreset === 'claude-code'
+    ? t('chat.title.claude')
+    : agentPreset === 'codex'
+      ? t('chat.title.codex')
+      : t('chat.title.terminal');
+
   return (
     <div className={`terminal-pane ${focused ? 'terminal-pane--focused' : ''}`}>
+      <div className="terminal-pane__chatbar" aria-label={t('chat.controls.label')}>
+        <div className="terminal-pane__chat-context">
+          <span className="terminal-pane__chat-status" aria-hidden="true" />
+          <span className="terminal-pane__chat-title">{chatTitle}</span>
+          <span className="terminal-pane__chat-hint">{t('chat.copy.hint')}</span>
+        </div>
+        <div className="terminal-pane__chat-actions">
+          <span className="terminal-pane__copy-message" aria-live="polite">{copyMessage}</span>
+          <button
+            type="button"
+            className="terminal-pane__chat-action"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleCopy}
+          >
+            {t('chat.copy.action')}
+          </button>
+          <button
+            type="button"
+            className="terminal-pane__chat-action"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handlePaste}
+          >
+            {t('chat.paste.action')}
+          </button>
+        </div>
+      </div>
       <div ref={terminalRef} className="terminal-pane__container" />
       {showFindBar && (
         <FindBar

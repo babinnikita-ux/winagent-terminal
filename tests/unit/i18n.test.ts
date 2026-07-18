@@ -22,8 +22,8 @@ describe('i18n: translate (issue #56)', () => {
   });
 
   it('exposes the three shipped languages', () => {
-    expect(SUPPORTED_LANGUAGES).toEqual(['en', 'fr', 'zh']);
-    expect(LANGUAGES.map((l) => l.label)).toEqual(['English', 'Français', '中文']);
+    expect(SUPPORTED_LANGUAGES).toEqual(['ru', 'en', 'fr', 'zh']);
+    expect(LANGUAGES.map((l) => l.label)).toEqual(['Русский', 'English', 'Français', '中文']);
   });
 });
 

@@ -13,7 +13,7 @@ import { AgentPreset, SplitNode, ThemeConfig } from '../../shared/types';
 import { UserColorScheme } from '../store/settings-slice';
 import { openInWmuxBrowser } from '../utils/open-in-browser';
 import { attachVisibleRenderer, RendererHandle } from '../utils/terminal-renderer';
-import { trimTrailingWhitespace } from '../utils/copy-text';
+import { copyTerminalText } from '../utils/copy-text';
 import '@xterm/xterm/css/xterm.css';
 
 declare global {
@@ -659,9 +659,10 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
       if (event.type === 'keydown' && event.ctrlKey && event.key === 'c') {
         // ConPTY pads lines to full width with real spaces — trim them or
         // pasted blocks carry ragged trailing whitespace (issue #102).
-        const selection = trimTrailingWhitespace(terminal.getSelection());
+        const selection = terminal.getSelection();
         if (selection) {
-          navigator.clipboard.writeText(selection).catch(() => {});
+          void copyTerminalText(selection, (text) => window.wmux.clipboard.writeText(text))
+            .catch(() => {});
           terminal.clearSelection();
           return false;
         }

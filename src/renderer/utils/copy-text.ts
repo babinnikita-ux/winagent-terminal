@@ -18,3 +18,14 @@ export function trimTrailingWhitespace(text: string): string {
     })
     .join('\n');
 }
+
+/** Write a cleaned terminal selection through the host clipboard. */
+export async function copyTerminalText(
+  selection: string,
+  writeText: (text: string) => void | Promise<void>,
+): Promise<boolean> {
+  const text = trimTrailingWhitespace(selection);
+  if (!text) return false;
+  await writeText(text);
+  return true;
+}
