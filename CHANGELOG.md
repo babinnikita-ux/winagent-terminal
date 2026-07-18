@@ -16,3 +16,4 @@ All notable changes are documented here.
 - Adopted the MIT-licensed wmux codebase as the audited implementation base.
 - Deferred external agent configuration writes, browser CDP and auto-updates
   until their planned milestones.
+- Isolated persisted WinAgent state from the upstream application's data root.

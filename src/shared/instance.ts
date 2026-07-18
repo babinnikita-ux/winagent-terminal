@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { APP_CONFIG } from './app-config';
 
 function suffix(): string {
   const name = process.env.WMUX_INSTANCE?.trim();
@@ -22,7 +23,7 @@ export function getPipePath(): string {
 
 export function getAppDataDir(): string {
   const base = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
-  return path.join(base, `wmux${suffix()}`);
+  return path.join(base, `${APP_CONFIG.packageName}${suffix()}`);
 }
 
 /**

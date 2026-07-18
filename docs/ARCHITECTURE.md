@@ -16,6 +16,8 @@ renderer, and kills the complete process tree when a surface closes. The React
 renderer owns the split tree and workspace state; it never spawns processes
 directly. `session-persistence` stores the app-owned window, workspace, pane,
 surface and working-directory state atomically for restoration after restart.
+Its state root is `%APPDATA%\\winagent-terminal`, deliberately separate from
+the upstream application's `%APPDATA%\\wmux` directory.
 
 ## Security boundary
 
