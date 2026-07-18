@@ -12,9 +12,9 @@ node-pty/ConPTY as its Milestone 1 foundation. No source code, assets, naming,
 or visual identity from GPL-licensed `cmux` is copied.
 
 The product identity is defined in `src/shared/app-config.ts`; Electron package
-and Windows identity are aligned with it. The upstream `wmux` protocol names
-remain temporarily internal compatibility details and will be migrated during
-the CLI/IPC milestone without breaking persisted Milestone 1 workspaces.
+and Windows identity are aligned with it. Milestone 5 exposes the public
+`wagent` CLI and `\\.\pipe\winagent-terminal`; inherited `wmux` protocol names
+remain internal compatibility details only.
 
 ## Audit sources and findings
 
@@ -57,7 +57,7 @@ Electron main process
 ├── Terminal service (node-pty + ConPTY)
 ├── Shell discovery and process lifecycle
 ├── Versioned session persistence
-├── Named-pipe boundary (future Milestone 5)
+├── Named-pipe boundary (`wagent`, authenticated local IPC)
 └── Window lifecycle
 
 Preload (minimal, validated API)

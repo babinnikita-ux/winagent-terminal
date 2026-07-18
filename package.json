@@ -6,7 +6,8 @@
   "license": "MIT",
   "main": "dist/main/index.js",
   "bin": {
-    "winagent": "dist/cli/wmux.js"
+    "wagent": "dist/cli/wagent.js",
+    "winagent": "dist/cli/wagent.js"
   },
   "scripts": {
     "dev": "concurrently \"vite --port 5199\" \"wait-on http://localhost:5199 && electron .\"",

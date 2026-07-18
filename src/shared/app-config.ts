@@ -9,5 +9,5 @@ export const APP_CONFIG = {
   productName: 'WinAgent Terminal',
   packageName: 'winagent-terminal',
   appUserModelId: 'io.winagent.terminal',
-  cliCommand: 'winagent',
+  cliCommand: 'wagent',
 } as const;

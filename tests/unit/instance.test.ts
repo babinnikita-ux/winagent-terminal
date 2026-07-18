@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import os from 'node:os';
 import path from 'node:path';
 import { APP_CONFIG } from '../../src/shared/app-config';
-import { getAppDataDir } from '../../src/shared/instance';
+import { getAppDataDir, getPipePath } from '../../src/shared/instance';
 
 const originalAppData = process.env.APPDATA;
 const originalInstance = process.env.WMUX_INSTANCE;
@@ -27,5 +27,11 @@ describe('instance storage identity', () => {
     process.env.WMUX_INSTANCE = 'test';
 
     expect(getAppDataDir()).toBe(path.join(process.env.APPDATA, `${APP_CONFIG.packageName}-test`));
+  });
+
+  it('uses the WinAgent named-pipe contract', () => {
+    delete process.env.WMUX_INSTANCE;
+    delete process.env.WINAGENT_INSTANCE;
+    expect(getPipePath()).toBe('\\\\.\\pipe\\winagent-terminal');
   });
 });

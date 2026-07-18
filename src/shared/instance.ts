@@ -13,12 +13,12 @@ import os from 'os';
 import { APP_CONFIG } from './app-config';
 
 function suffix(): string {
-  const name = process.env.WMUX_INSTANCE?.trim();
+  const name = process.env.WINAGENT_INSTANCE?.trim() || process.env.WMUX_INSTANCE?.trim();
   return name ? `-${name}` : '';
 }
 
 export function getPipePath(): string {
-  return `\\\\.\\pipe\\wmux${suffix()}`;
+  return `\\\\.\\pipe\\winagent-terminal${suffix()}`;
 }
 
 export function getAppDataDir(): string {
@@ -44,7 +44,7 @@ export function getPipeTokenPath(): string {
  * Returns '' when none is available.
  */
 export function readPipeToken(): string {
-  const fromEnv = process.env.WMUX_PIPE_TOKEN?.trim();
+  const fromEnv = process.env.WINAGENT_PIPE_TOKEN?.trim() || process.env.WMUX_PIPE_TOKEN?.trim();
   if (fromEnv) return fromEnv;
   try {
     return fs.readFileSync(getPipeTokenPath(), 'utf-8').trim();

@@ -111,6 +111,7 @@ function handleWindowV2(
 // as WMUX_PIPE_TOKEN so the CLI and hooks can authenticate.
 const pipeToken = ensurePipeToken();
 process.env.WMUX_PIPE_TOKEN = pipeToken;
+process.env.WINAGENT_PIPE_TOKEN = pipeToken;
 const pipeServer = new PipeServer(getPipePath(), pipeToken);
 const portScanner = new PortScanner();
 const cdpProxy = new CDPProxy();

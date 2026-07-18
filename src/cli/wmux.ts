@@ -7,7 +7,8 @@ import path from 'path';
 
 // Respect WMUX_PIPE when set (e.g. by a parent wmux running with WMUX_INSTANCE),
 // so the CLI talks to the same instance that spawned the shell.
-const PIPE_PATH = process.env.WMUX_PIPE || '\\\\.\\pipe\\wmux';
+const PIPE_PATH = process.env.WINAGENT_PIPE || process.env.WMUX_PIPE || '\\\\.\\pipe\\winagent-terminal';
+const CLI_NAME = process.env.WINAGENT_CLI ? 'wagent' : 'wmux';
 
 // ─── Remote transport (issue #78: remote wmux management) ────────────────────
 // When --remote host[:port] (or WMUX_REMOTE) is set, every command connects
@@ -39,7 +40,7 @@ function connectTransport(onConnect: () => void): net.Socket {
 // into the shells it spawns; for CLIs launched elsewhere, fall back to the
 // token file in the instance's APPDATA dir (readable only by this user).
 function readPipeToken(): string {
-  const fromEnv = process.env.WMUX_PIPE_TOKEN?.trim();
+  const fromEnv = process.env.WINAGENT_PIPE_TOKEN?.trim() || process.env.WMUX_PIPE_TOKEN?.trim();
   if (fromEnv) return fromEnv;
   try {
     const suffix = process.env.WMUX_INSTANCE?.trim() ? `-${process.env.WMUX_INSTANCE.trim()}` : '';
@@ -553,7 +554,7 @@ async function main() {
     await handler(args);
   } catch (err: any) {
     if (err.code === 'ENOENT' || err.code === 'ECONNREFUSED') {
-      console.error('wmux is not running (could not connect to pipe)');
+      console.error(`${CLI_NAME} is not running (could not connect to pipe)`);
     } else {
       console.error(`Error: ${err.message}`);
     }
@@ -562,7 +563,7 @@ async function main() {
 }
 
 function printUsage() {
-  console.log(`wmux CLI — Windows terminal multiplexer
+  const usage = `wmux CLI — Windows terminal multiplexer
 
 Usage: wmux <command> [options]
 
@@ -589,7 +590,8 @@ Sidebar:    set-status, set-progress, log, sidebar-state
 Hook:       hook --event <type> --tool <name> [--agent <id>]
 Config:     config show|reload|path   (edits ~/.wmux/config.toml — see docs)
             reload-config             (shorthand for 'config reload')
-`);
+`;
+  console.log(usage.replaceAll('wmux', CLI_NAME).replaceAll('~/.wagent', '~/.wmux'));
 }
 
 main();

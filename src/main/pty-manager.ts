@@ -88,12 +88,12 @@ function getCliPath(): string {
 
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
-      return path.join(process.resourcesPath, 'cli', 'wmux.js');
+      return path.join(process.resourcesPath, 'cli', 'wagent.js');
     }
   } catch {
     // Not running in Electron
   }
-  return path.join(__dirname, '../cli/wmux.js');
+  return path.join(__dirname, '../cli/wagent.js');
 }
 
 // Dir holding the `wmux`/`wmux.cmd` shims (each runs `node $WMUX_CLI`). Prepended
@@ -306,6 +306,9 @@ export class PtyManager {
       WMUX_PIPE: getPipePath(),
       WMUX_PIPE_TOKEN: readPipeToken(),
       WMUX_CLI: cliPath,
+      WINAGENT_PIPE: getPipePath(),
+      WINAGENT_PIPE_TOKEN: readPipeToken(),
+      WINAGENT_CLI: cliPath,
     };
 
     // Make bare `wmux` resolvable in every spawned shell AND all its children

@@ -11,7 +11,8 @@ keyboard-first навигация, Command Palette, поиск shell, ConPTY, и
 ProxyAPI и AI-профили готовы: Claude Code и Codex запускаются через меню **+**,
 а ключ передаётся только из `PROXYAPI_KEY`. Browser Surface поддерживает
 localhost, навигацию, DevTools и локальную CDP-автоматизацию; страницы браузера
-изолированы от Electron. CLI/IPC остаётся следующим этапом.
+изолированы от Electron. CLI `wagent` использует локальный аутентифицированный
+IPC: [справочник команд](docs/CLI_REFERENCE.md).
 
 ## Запуск из исходников
 

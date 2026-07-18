@@ -7,6 +7,7 @@ All notable changes are documented here.
 ### Added
 
 - Milestone 4 Browser Surface security policy and regression coverage.
+- Milestone 5 `wagent` CLI and authenticated `\\.\pipe\winagent-terminal` IPC contract.
 
 ### Changed
 

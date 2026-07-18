@@ -35,5 +35,7 @@ Browser Surfaces use Electron guest webviews only for `http:`, `https:` and
 `about:blank` pages. Electron strips their preload, Node integration and popup
 privileges before attachment; guest pages are sandboxed and cannot access the
 application IPC bridge. Browser CDP remains a local developer-tool boundary;
-named-pipe commands remain a later milestone and must not be trusted merely
-because they originate in a renderer, shell, or local process.
+The public `wagent` CLI sends versioned JSON-RPC-like requests through
+`\\.\pipe\winagent-terminal`. Privileged commands need the per-instance token;
+they must not be trusted merely because they originate in a renderer, shell or
+local process.
