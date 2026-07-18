@@ -9,7 +9,9 @@ Milestone 1–3: окна, Workspace, Terminal Surface, split panes, вклад�
 keyboard-first навигация, Command Palette, поиск shell, ConPTY, изменение
 размера, корректное завершение процессов и восстановление структуры сессии.
 ProxyAPI и AI-профили готовы: Claude Code и Codex запускаются через меню **+**,
-а ключ передаётся только из `PROXYAPI_KEY`. Браузер и CLI/IPC остаются следующими этапами.
+а ключ передаётся только из `PROXYAPI_KEY`. Browser Surface поддерживает
+localhost, навигацию, DevTools и локальную CDP-автоматизацию; страницы браузера
+изолированы от Electron. CLI/IPC остаётся следующим этапом.
 
 ## Запуск из исходников
 

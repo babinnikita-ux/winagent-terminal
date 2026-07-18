@@ -31,5 +31,9 @@ passes a fixed `claude-code` or `codex` identifier, never a credential; the key
 is read from `PROXYAPI_KEY` only while spawning the child process. Codex receives
 an isolated, credential-free provider TOML, while Claude Code receives its
 ProxyAPI endpoint through child-process environment variables. Browser
-automation and named-pipe commands remain later milestones and must not be
-trusted merely because they originate in a renderer, shell, or local process.
+Browser Surfaces use Electron guest webviews only for `http:`, `https:` and
+`about:blank` pages. Electron strips their preload, Node integration and popup
+privileges before attachment; guest pages are sandboxed and cannot access the
+application IPC bridge. Browser CDP remains a local developer-tool boundary;
+named-pipe commands remain a later milestone and must not be trusted merely
+because they originate in a renderer, shell, or local process.

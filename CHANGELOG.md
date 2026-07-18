@@ -2,6 +2,17 @@
 
 All notable changes are documented here.
 
+## [0.3.0] - 2026-07-18
+
+### Added
+
+- Milestone 4 Browser Surface security policy and regression coverage.
+
+### Changed
+
+- Guest browser pages are sandboxed before attachment and cannot receive a
+  preload API, Node integration, popups, plugins or unsafe navigation schemes.
+
 ## [0.2.0] - 2026-07-18
 
 ### Added

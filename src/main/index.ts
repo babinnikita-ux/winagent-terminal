@@ -5,6 +5,7 @@ import { handleBridgeV2 } from './v2-bridge';
 import { distributeAgents } from './agent-manager';
 import { PipeServer } from './pipe-server';
 import { PortScanner } from './port-scanner';
+import { hardenWebviewPreferences, isAllowedBrowserUrl, isSafeExternalUrl } from './browser-security';
 import { CDPProxy } from './cdp-proxy';
 import { IPC_CHANNELS, SurfaceId } from '../shared/types';
 import { APP_CONFIG } from '../shared/app-config';
@@ -264,21 +265,18 @@ function hardenWebContents(): void {
   app.on('web-contents-created', (_event, contents) => {
     const type = contents.getType();
 
-    if (type === 'webview') {
-      // Enforce safe webview preferences regardless of attributes set in the DOM.
+    // Electron emits will-attach-webview on the embedding BrowserWindow, not
+    // the guest itself. Register it here before any renderer can attach one.
+    if (type !== 'webview') {
       contents.on('will-attach-webview', (_e, webPreferences, params) => {
-        delete (webPreferences as any).preload;
-        delete (webPreferences as any).preloadURL;
-        webPreferences.nodeIntegration = false;
-        webPreferences.contextIsolation = true;
-        (params as any).nodeintegration = 'false';
+        hardenWebviewPreferences(webPreferences, params);
       });
     }
 
     // Open new-window requests externally rather than spawning in-app windows
     // with full privileges. Only http/https go to the OS browser; deny the rest.
     contents.setWindowOpenHandler(({ url }) => {
-      if (/^https?:\/\//i.test(url)) {
+      if (isSafeExternalUrl(url)) {
         shell.openExternal(url).catch(() => {});
       }
       return { action: 'deny' };
@@ -287,13 +285,19 @@ function hardenWebContents(): void {
     // The main app window (loads localhost in dev, file:// in prod) must never
     // be navigated to remote content. Webviews host their own contents and are
     // exempt — their navigation is the whole point.
-    if (type !== 'webview') {
+    if (type === 'webview') {
+      const blockUnsafeBrowserNavigation = (event: Electron.Event, url: string) => {
+        if (!isAllowedBrowserUrl(url)) event.preventDefault();
+      };
+      contents.on('will-navigate', blockUnsafeBrowserNavigation);
+      contents.on('will-redirect', blockUnsafeBrowserNavigation);
+    } else {
       contents.on('will-navigate', (e, url) => {
         const isDevServer = url.startsWith('http://localhost:') || url.startsWith('http://127.0.0.1:');
         const isLocalFile = url.startsWith('file://');
         if (!isDevServer && !isLocalFile) {
           e.preventDefault();
-          if (/^https?:\/\//i.test(url)) shell.openExternal(url).catch(() => {});
+          if (isSafeExternalUrl(url)) shell.openExternal(url).catch(() => {});
         }
       });
     }

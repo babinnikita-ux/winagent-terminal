@@ -6,11 +6,13 @@ ConPTY.
 
 ## Current milestone
 
-Milestones 1–2 provide the terminal core and multiplexer UX: application
+Milestones 1–4 provide the terminal core, multiplexer UX, ProxyAPI launch
+presets and Browser Surface: application
 windows, workspaces, terminal surfaces, split panes, tabs, keyboard navigation,
 command palette, shell detection, ConPTY process lifecycle, resize and session
-persistence. AI providers, browser automation and user-facing CLI/IPC are
-deliberately scheduled for later milestones.
+persistence. Browser pages are isolated from Electron privileges and support
+localhost previews, navigation controls and local CDP automation. User-facing
+CLI/IPC remains scheduled for the next milestone.
 
 ## Development
 
