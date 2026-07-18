@@ -14,6 +14,7 @@ All notable changes are documented here.
   prevents an exit/resize race from crashing the test or application process.
 - The NSIS installer adds the bundled `wagent` shim to the current-user PATH;
   it uses the packaged Electron runtime when Node.js is not installed.
+- Installer packaging now includes all CLI runtime modules required by `wagent`.
 
 ## [0.3.0] - 2026-07-18
 
