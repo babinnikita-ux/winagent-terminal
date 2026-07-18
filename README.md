@@ -6,10 +6,11 @@ ConPTY.
 
 ## Current milestone
 
-Milestone 1 implements the terminal core: application windows, workspaces,
-terminal surfaces, shell detection, ConPTY process lifecycle, resize and
-session persistence. AI providers, browser automation and user-facing CLI/IPC
-are deliberately scheduled for later milestones.
+Milestones 1–2 provide the terminal core and multiplexer UX: application
+windows, workspaces, terminal surfaces, split panes, tabs, keyboard navigation,
+command palette, shell detection, ConPTY process lifecycle, resize and session
+persistence. AI providers, browser automation and user-facing CLI/IPC are
+deliberately scheduled for later milestones.
 
 ## Development
 

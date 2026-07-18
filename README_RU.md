@@ -5,10 +5,10 @@ agents. В основе — Electron, React, xterm.js и Windows ConPTY.
 
 ## Текущий этап
 
-Готовится Milestone 1: окна, Workspace, Terminal Surface, автоматический
-поиск shell, ConPTY, изменение размера, корректное завершение процессов и
-восстановление структуры сессии. ProxyAPI, AI-профили, браузер и CLI/IPC
-остаются отдельными следующими этапами.
+Milestone 1–2: окна, Workspace, Terminal Surface, split panes, вкладки,
+keyboard-first навигация, Command Palette, поиск shell, ConPTY, изменение
+размера, корректное завершение процессов и восстановление структуры сессии.
+ProxyAPI, AI-профили, браузер и CLI/IPC остаются отдельными следующими этапами.
 
 ## Запуск из исходников
 

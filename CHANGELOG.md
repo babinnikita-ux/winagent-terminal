@@ -10,6 +10,7 @@ All notable changes are documented here.
 - WinAgent Terminal product configuration and Windows package identity.
 - Architecture, threat-model, security and third-party attribution documents.
 - Windows CI for linting, compilation, renderer build and unit tests.
+- Regression tests for the required keyboard-first multiplexer shortcuts.
 
 ### Changed
 
