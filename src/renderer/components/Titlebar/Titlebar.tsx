@@ -1,9 +1,9 @@
 import React from 'react';
-import logoSrc from '../../assets/logo.png';
 import NotificationBell from './NotificationBell';
 import UpdateBadge from './UpdateBadge';
 import { NotificationInfo, WorkspaceId, PaneId, SurfaceId } from '../../../shared/types';
 import { useT } from '../../i18n';
+import { APP_CONFIG } from '../../../shared/app-config';
 import '../../styles/titlebar.css';
 
 interface TitlebarProps {
@@ -35,15 +35,9 @@ export default function Titlebar({
   return (
     <div className="titlebar">
       <div className="titlebar__left">
-        <img
-          src={logoSrc}
-          alt="wmux"
-          className="titlebar__logo"
-          draggable={false}
-          style={{ cursor: 'pointer' }}
-          onClick={() => window.wmux?.system?.openExternal?.('https://wmux.org') }
-          title="wmux.org"
-        />
+        <span className="titlebar__logo" aria-label={APP_CONFIG.productName} title={APP_CONFIG.productName}>
+          WA
+        </span>
         <button className="titlebar__btn" onClick={onHelpClick} title={t('titlebar.help')}>?</button>
         <button className="titlebar__btn" onClick={onDevToolsClick} title={t('titlebar.devtools')}>&lt;/&gt;</button>
         <NotificationBell

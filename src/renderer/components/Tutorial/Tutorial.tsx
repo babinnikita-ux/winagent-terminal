@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { APP_CONFIG } from '../../../shared/app-config';
 import '../../styles/tutorial.css';
 
 interface TutorialProps {
@@ -13,8 +14,8 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    title: 'Welcome to wmux',
-    body: 'wmux is a terminal multiplexer for running AI coding agents in parallel. This quick tour will show you the essentials.',
+    title: `Welcome to ${APP_CONFIG.productName}`,
+    body: 'WinAgent Terminal is a terminal multiplexer for parallel AI coding work. This quick tour will show you the essentials.',
     shortcuts: [],
   },
   {

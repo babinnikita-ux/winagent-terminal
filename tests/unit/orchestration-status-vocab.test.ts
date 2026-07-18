@@ -8,6 +8,14 @@ import type { OrchAgentStatus, OrchWaveStatus, OrchRunStatus } from '../../src/s
 const SCRIPTS = path.resolve(__dirname, '../../resources/wmux-orchestrator/scripts');
 const HOOK = path.join(SCRIPTS, 'on-agent-stop.sh');
 const JSON_TOOL = path.join(SCRIPTS, 'json-tool.js');
+const hasBash = (() => {
+  try {
+    execFileSync('where', ['bash'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+})();
 
 // The only status words the app understands. Typed against src/shared/types.ts so
 // these arrays stop compiling if either union changes without this test noticing.
@@ -57,7 +65,7 @@ afterEach(() => {
   fs.rmSync(tmp, { recursive: true, force: true });
 });
 
-describe('on-agent-stop.sh status vocabulary (#99)', () => {
+(hasBash ? describe : describe.skip)('on-agent-stop.sh status vocabulary (#99)', () => {
   it('marks a successful agent "exited" — the word the sidebar counts, not "completed"', () => {
     writeState();
     runHook();

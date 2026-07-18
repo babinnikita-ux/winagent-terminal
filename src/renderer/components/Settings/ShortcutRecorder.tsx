@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShortcutBinding, ShortcutAction, DEFAULT_SHORTCUTS } from '../../store/settings-slice';
+import { ShortcutBinding, ShortcutAction } from '../../store/settings-slice';
 import { useStore } from '../../store';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

@@ -47,7 +47,7 @@ export function saveSession(data: SessionData): void {
     fs.renameSync(tmpFile, SESSION_FILE);
   } catch (err) {
     // Clean up temp file if it exists
-    try { fs.unlinkSync(tmpFile); } catch {}
+    try { fs.unlinkSync(tmpFile); } catch { /* temporary write was not created */ }
     console.error('Failed to save session:', err);
   }
 }
@@ -88,7 +88,7 @@ export function handleVersionChange(currentVersion: string): boolean {
     if (saved === currentVersion) return false;
     // Reset only the volatile auto-session. Named sessions (SAVED_DIR) and the
     // last-session pointer are intentionally preserved across updates.
-    try { if (fs.existsSync(SESSION_FILE)) fs.unlinkSync(SESSION_FILE); } catch {}
+    try { if (fs.existsSync(SESSION_FILE)) fs.unlinkSync(SESSION_FILE); } catch { /* best-effort recovery */ }
     fs.writeFileSync(VERSION_FILE, currentVersion, 'utf-8');
     return true;
   } catch { return false; }

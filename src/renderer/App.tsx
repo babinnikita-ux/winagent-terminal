@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import { useStore } from './store';
+import { APP_CONFIG } from '../shared/app-config';
 import { PaneId, SurfaceId, WorkspaceId, WorkspaceInfo, SplitNode } from '../shared/types';
 import SplitContainer from './components/SplitPane/SplitContainer';
 import { updateRatio, getAllPaneIds, findLeaf, replaceSoleTerminalSurface } from './store/split-utils';
@@ -89,7 +90,7 @@ function fireNotification(
   if (workspaceId) {
     addNotification({ surfaceId: (surfaceId || '') as SurfaceId, workspaceId, text });
   }
-  window.wmux?.notification?.fire({ surfaceId: surfaceId || '', text, title: 'wmux' });
+  window.wmux?.notification?.fire({ surfaceId: surfaceId || '', text, title: APP_CONFIG.productName });
 }
 
 /** Resolve the workspace that owns a surface, or undefined. */
@@ -114,7 +115,7 @@ function handlePortsUpdate(cmd: any, updateWorkspaceMetadata: StoreAction): void
     for (const ws of useStore.getState().workspaces) {
       updateWorkspaceMetadata(ws.id, { ports: devPorts.length > 0 ? devPorts : undefined });
     }
-  } catch {}
+  } catch { /* native notification is optional */ }
 }
 
 /** `wmux notify <text>` — works even outside a pane (falls back to active workspace). */
@@ -386,7 +387,7 @@ export default function App() {
           if (autoSaved.sidebarWidth) setSidebarWidth(autoSaved.sidebarWidth);
           return;
         }
-      } catch {}
+      } catch { /* no active terminal to focus */ }
       try {
         const sessions = await window.wmux?.session?.list();
         if (sessions && sessions.length > 0) {
@@ -398,7 +399,7 @@ export default function App() {
             return;
           }
         }
-      } catch {}
+      } catch { /* no active terminal to focus */ }
       // No saved session — create default workspace
       if (useStore.getState().workspaces.length === 0) {
         createWorkspace({
@@ -682,7 +683,7 @@ export default function App() {
       terminalPrefs: { ...state.terminalPrefs },
     };
     await window.wmux?.session?.save(session);
-    window.wmux?.notification?.fire({ surfaceId: '', text: `Session "${name}" saved`, title: 'wmux' });
+    window.wmux?.notification?.fire({ surfaceId: '', text: `Session "${name}" saved`, title: APP_CONFIG.productName });
   }, [sidebarWidth]);
 
   const handleLoadSession = useCallback(async (name: string) => {

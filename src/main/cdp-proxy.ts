@@ -165,7 +165,7 @@ export class CDPProxy {
       wc.debugger.on('message', onDebuggerMessage);
 
       const cleanup = () => {
-        try { wc?.debugger.removeListener('message', onDebuggerMessage); } catch {}
+        try { wc?.debugger.removeListener('message', onDebuggerMessage); } catch { /* target already disposed */ }
         this.activeWs = null;
       };
 

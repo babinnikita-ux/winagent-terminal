@@ -306,7 +306,7 @@ function scheduleDeferredRepaint(terminal: Terminal): ReturnType<typeof setTimeo
       try {
         terminal.scrollToBottom();
         terminal.refresh(0, terminal.rows - 1);
-      } catch {}
+      } catch { /* clipboard access is best-effort */ }
     });
   }, 300);
 }
@@ -634,7 +634,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
           const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
           const text = new TextDecoder('utf-8').decode(bytes);
           if (text) window.wmux?.clipboard?.writeText?.(text);
-        } catch {}
+        } catch { /* terminal may be disposed during asynchronous setup */ }
       }
       return true;
     });
@@ -687,7 +687,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
             try {
               const text = await window.wmux.clipboard.readText();
               if (text) terminal.paste(text);
-            } catch {}
+            } catch { /* terminal may be disposed during asynchronous cleanup */ }
           }
         })();
         return false; // Prevent default — we handle paste ourselves
@@ -712,7 +712,9 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
         // Track SGR/button mouse enable (?1006h, ?1000h, ?1002h, ?1003h) and disable
         // so the wheel handler can distinguish tmux from a plain shell after remount.
         // Mirror the enable pattern for disable so any of the four modes clears the flag.
+        // eslint-disable-next-line no-control-regex -- terminal mouse mode sequence
         if (/\x1b\[\?100[0236]h/.test(data)) surfaceMouseEnabled.set(id, true);
+        // eslint-disable-next-line no-control-regex -- terminal mouse mode sequence
         else if (/\x1b\[\?100[0236]l/.test(data)) surfaceMouseEnabled.set(id, false);
         terminal.write(data);
       });
@@ -858,7 +860,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
         // pty.resize() call above and redraw themselves. A premature refresh here
         // would paint stale/clipped buffer content before their redraw arrives.
         if (!surfaceId || !surfaceMouseEnabled.get(surfaceId)) {
-          try { terminal.refresh(0, terminal.rows - 1); } catch {}
+          try { terminal.refresh(0, terminal.rows - 1); } catch { /* surface is closing */ }
         }
       });
     });
@@ -928,7 +930,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
       try {
         const text = await window.wmux.clipboard.readText();
         if (text) term.paste(text);
-      } catch {}
+      } catch { /* resize observer can fire after terminal disposal */ }
     };
     document.addEventListener('wmux:paste-terminal', handler);
     return () => document.removeEventListener('wmux:paste-terminal', handler);

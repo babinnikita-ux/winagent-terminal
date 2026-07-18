@@ -71,7 +71,7 @@ export function parseShellSpec(spec: string | undefined): { command: string; arg
 
 function getShellIntegrationPath(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'shell-integration');
@@ -84,7 +84,7 @@ function getShellIntegrationPath(): string {
 
 function getCliPath(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'cli', 'wmux.js');
@@ -102,7 +102,7 @@ function getCliPath(): string {
 // has no wmux.exe, so there is no PATHEXT collision with the GUI.
 function getCliBinPath(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'cli-bin');

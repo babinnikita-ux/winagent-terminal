@@ -79,7 +79,7 @@ function normalizeColor(color: string): string {
  */
 function getThemesDir(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'themes');

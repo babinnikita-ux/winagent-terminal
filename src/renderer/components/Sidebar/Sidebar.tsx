@@ -70,7 +70,7 @@ export default function Sidebar({
           }
         }
         setAgentCounts(counts);
-      } catch {}
+      } catch { /* agent metrics are optional sidebar metadata */ }
       polling = false;
     }, 3000);
     return () => clearInterval(interval);

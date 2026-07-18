@@ -1,11 +1,12 @@
 {
-  "name": "wmux",
+  "name": "winagent-terminal",
   "version": "0.27.1",
-  "description": "Windows terminal multiplexer for AI agents",
+  "description": "Windows terminal multiplexer for parallel AI coding agents",
+  "author": "Nikita <292062259+babinnikita-ux@users.noreply.github.com>",
   "license": "MIT",
   "main": "dist/main/index.js",
   "bin": {
-    "wmux": "dist/cli/wmux.js"
+    "winagent": "dist/cli/wmux.js"
   },
   "scripts": {
     "dev": "concurrently \"vite --port 5199\" \"wait-on http://localhost:5199 && electron .\"",

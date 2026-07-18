@@ -7,7 +7,7 @@ const END_MARKER = '<!-- wmux:end -->';
 
 function getInstructionsPath(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'claude-instructions', 'claude-instructions.md');
@@ -90,21 +90,8 @@ export function ensureClaudeContext(): void {
   }
 }
 
-const HOOK_MARKER = 'wmux-hook';
-
 function getSettingsPath(): string {
   return path.join(os.homedir(), '.claude', 'settings.json');
-}
-
-function getCliAbsolutePath(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { app } = require('electron') as typeof import('electron');
-    if (app.isPackaged) {
-      return path.join(process.resourcesPath, 'cli', 'wmux.js');
-    }
-  } catch {}
-  return path.resolve(path.join(__dirname, '../cli/wmux.js'));
 }
 
 /** Tools tracked via PostToolUse hooks for the sidebar/diff view. */
@@ -180,7 +167,7 @@ export function ensureClaudeHooks(): void {
     // can't read ASAR files, so we use the standalone copy in resources/cli/.
     let hookScript: string;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+
       const { app } = require('electron') as typeof import('electron');
       if (app.isPackaged) {
         hookScript = path.join(process.resourcesPath, 'cli', 'wmux-hook.js');
@@ -273,7 +260,7 @@ export function ensureOrchestratorPlugin(): void {
     // 1. Locate plugin source directory
     let pluginSrcDir: string;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+
       const { app } = require('electron') as typeof import('electron');
       if (app.isPackaged) {
         pluginSrcDir = path.join(process.resourcesPath, 'wmux-orchestrator');

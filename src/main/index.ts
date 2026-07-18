@@ -7,15 +7,11 @@ import { PipeServer } from './pipe-server';
 import { PortScanner } from './port-scanner';
 import { CDPProxy } from './cdp-proxy';
 import { IPC_CHANNELS, SurfaceId } from '../shared/types';
+import { APP_CONFIG } from '../shared/app-config';
 import { getPipePath, getAppDataDir, ensurePipeToken } from '../shared/instance';
 import { loadSession, saveSession, handleVersionChange, SessionData } from './session-persistence';
 import { WindowManager } from './window-manager';
-import { initAutoUpdater } from './updater';
-import { initUpdateChecker, getLatestUpdate } from './update-checker';
-import { ensureClaudeContext, ensureClaudeHooks, ensureChromeDevtoolsConfig, ensureOrchestratorPlugin } from './claude-context';
-import { ensureOpencodeContext, ensureOpencodePlugin } from './opencode-context';
 import { applyExternalActivity } from './claude-observer';
-import { startOrchestrationWatcher } from './orchestration-watcher';
 import fs from 'fs';
 import path from 'path';
 
@@ -230,7 +226,8 @@ function translateKeyName(key: string, shift: boolean): string | null {
 }
 
 // Set Windows AppUserModelId so taskbar pinning uses the correct icon & identity
-app.setAppUserModelId('com.wmux.app');
+app.setName(APP_CONFIG.productName);
+app.setAppUserModelId(APP_CONFIG.appUserModelId);
 
 // Auto-strip MOTW on startup so users never see security warnings or pinning failures
 stripMotw();
@@ -307,13 +304,9 @@ app.whenReady().then(() => {
   // A losing second instance is already quitting; don't run startup side effects.
   if (!gotInstanceLock) return;
   hardenWebContents();
-  // Inject wmux instructions into ~/.claude/CLAUDE.md for Claude Code awareness
-  ensureClaudeContext();
-  ensureClaudeHooks();
-  ensureChromeDevtoolsConfig();
-  ensureOrchestratorPlugin();
-  ensureOpencodeContext();
-  ensureOpencodePlugin();
+  // Provider hooks and any modification of user-owned Claude/Codex files are
+  // intentionally deferred to Milestone 3. The terminal core must never alter
+  // external configuration just because the app was launched.
 
   // IPC: renderer pushes session state (auto-save response or explicit save)
   ipcMain.on('session:save', (event, data: SessionData) => {
@@ -339,32 +332,18 @@ app.whenReady().then(() => {
   const savedWindow = savedSession?.windows?.[0];
   windowManager.createWindow(savedWindow?.bounds, savedWindow?.maximized);
 
-  // Initialize auto-updater only when packaged (avoids errors in dev)
-  if (app.isPackaged) {
-    initAutoUpdater();
-    initUpdateChecker();
-  }
-
-  // Late-mounted windows query the cached latest update info so the badge
-  // appears even if the GitHub poll fired before the window's renderer attached.
-  ipcMain.handle(IPC_CHANNELS.UPDATE_GET_LATEST, () => getLatestUpdate());
-  ipcMain.on(IPC_CHANNELS.UPDATE_OPEN_RELEASE, (_event, url: string) => {
-    // Whitelist GitHub release URLs so a hostile renderer can't pivot this
-    // channel into an arbitrary openExternal sink.
-    if (typeof url === 'string' && /^https:\/\/github\.com\//.test(url)) {
-      shell.openExternal(url).catch(() => {});
-    }
-  });
+  // Update delivery is a Milestone 6 concern. Until a signed release channel
+  // exists, the terminal never downloads or advertises updates.
 
   // Kick off the first auto-save cycle after the window is ready
   scheduleAutoSave();
 
   // Start named pipe server
   pipeServer.start();
-  cdpProxy.start().catch(() => {}); // CDP proxy is optional — don't crash if ports are busy
+  // Browser CDP starts in Milestone 4.
 
   // Watch TMPDIR for wmux-orchestrator runs and push state to the sidebar.
-  startOrchestrationWatcher();
+  // External agent orchestration begins in Milestone 3.
 
   portScanner.onResults((portsByPid) => {
     BrowserWindow.getAllWindows().forEach(win => {
@@ -398,7 +377,7 @@ app.whenReady().then(() => {
 
     switch (request.method) {
       case 'system.identify':
-        respond({ name: 'wmux', version: '0.5.0', platform: 'win32' });
+        respond({ name: APP_CONFIG.productName, version: app.getVersion(), platform: 'win32' });
         break;
       case 'system.capabilities':
         respond({ protocols: ['v1', 'v2'], features: ['workspaces', 'splits', 'notifications'] });

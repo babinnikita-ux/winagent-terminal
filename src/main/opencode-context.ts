@@ -30,7 +30,7 @@ export function injectWmuxBlock(existing: string, wmuxBlock: string): string {
 
 function getInstructionsPath(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'claude-instructions', 'claude-instructions.md');
@@ -79,7 +79,7 @@ export function pluginNeedsUpdate(src: string, target: string | null): boolean {
 
 function getPluginSrcPath(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     const { app } = require('electron') as typeof import('electron');
     if (app.isPackaged) {
       return path.join(process.resourcesPath, 'opencode-plugin', 'wmux.js');

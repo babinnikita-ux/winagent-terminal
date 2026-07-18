@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { IPC_CHANNELS, SurfaceId, WindowId, WorkspaceId, AgentId } from '../shared/types';
+import { APP_CONFIG } from '../shared/app-config';
 import { observePtyData } from './claude-observer';
 import { PtyManager } from './pty-manager';
 import { NotificationManager } from './notification-manager';
@@ -57,7 +58,7 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
           window.webContents.send(IPC_CHANNELS.PTY_DATA, id, data);
         }
         // Feed Claude Code observer for sidebar activity display
-        try { observePtyData(id, data); } catch {}
+        try { observePtyData(id, data); } catch { /* observer must not disrupt PTY streaming */ }
       });
       const unsubExit = ptyManager.onExit(id, (code) => {
         if (window && !window.isDestroyed()) {
@@ -70,7 +71,7 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
       return created;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(`Failed to create terminal: ${msg}`);
+      throw new Error(`Failed to create terminal: ${msg}`, { cause: err });
     }
   });
 
@@ -169,7 +170,7 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
   ipcMain.on(IPC_CHANNELS.NOTIFICATION_FIRE, (_event, data: { surfaceId: string; text: string; title?: string }) => {
     const window = BrowserWindow.fromWebContents(_event.sender);
     // Show toast
-    notificationManager.showToast(data.title || 'wmux', data.text, () => {
+    notificationManager.showToast(data.title || APP_CONFIG.productName, data.text, () => {
       if (window && !window.isDestroyed()) {
         window.focus();
         window.webContents.send('notification:focus-surface', data.surfaceId);

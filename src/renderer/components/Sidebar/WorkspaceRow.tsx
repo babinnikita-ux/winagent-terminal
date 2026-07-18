@@ -58,7 +58,7 @@ export default function WorkspaceRow({
   onDrop,
   onDragEnd,
   isDragOver = false,
-  agentCount = 0,
+  agentCount: _agentCount = 0,
   hookActivity,
   claudeActivity,
 }: WorkspaceRowProps) {
