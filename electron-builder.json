@@ -42,6 +42,7 @@
     { "from": "src/shell-integration", "to": "shell-integration" },
     { "from": "dist/cli/wmux.js", "to": "cli/wmux.js" },
     { "from": "dist/cli/wagent.js", "to": "cli/wagent.js" },
+    { "from": "dist/cli/wmux-hook.js", "to": "cli/wmux-hook.js" },
     { "from": "src/cli-bin", "to": "cli-bin" },
     { "from": "resources/wmux-orchestrator", "to": "wmux-orchestrator" }
   ]

@@ -202,6 +202,11 @@ interface PtyEntry {
   writeChain: Promise<void>;
   pendingChunks: number;
   alive: boolean;
+  // node-pty queues resize calls until its Windows agent is ready. If the child
+  // exits before that queue drains, node-pty throws outside our call stack.
+  // Keep the latest requested geometry here and apply it only after first data.
+  ready: boolean;
+  resizePending: boolean;
   // Last applied size. Used to drop redundant same-size resizes, which would
   // otherwise make the shell (PSReadLine/oh-my-posh) redraw the prompt for no
   // reason — a cause of the doubled prompt on startup.
@@ -309,6 +314,7 @@ export class PtyManager {
       WINAGENT_PIPE: getPipePath(),
       WINAGENT_PIPE_TOKEN: readPipeToken(),
       WINAGENT_CLI: cliPath,
+      WINAGENT_SURFACE_ID: id,
     };
 
     // Make bare `wmux` resolvable in every spawned shell AND all its children
@@ -394,6 +400,8 @@ export class PtyManager {
       writeChain: Promise.resolve(),
       pendingChunks: 0,
       alive: true,
+      ready: false,
+      resizePending: false,
       cols: spawnOptions.cols ?? 80,
       rows: spawnOptions.rows ?? 24,
       shell,
@@ -401,6 +409,13 @@ export class PtyManager {
     };
 
     ptyProcess.onData((data) => {
+      if (!entry.ready) {
+        entry.ready = true;
+        if (entry.resizePending && entry.alive) {
+          entry.resizePending = false;
+          try { ptyProcess.resize(entry.cols, entry.rows); } catch { /* exited while becoming ready */ }
+        }
+      }
       // Answer DA1 probes in-process so the prompt never stalls or leaks the
       // reply (see DA1_QUERY note above). Only the escape character is common
       // enough to warrant the cheap guard before the regex scan.
@@ -474,13 +489,17 @@ export class PtyManager {
 
   resize(id: SurfaceId, cols: number, rows: number): void {
     const entry = this.ptys.get(id);
-    if (!entry) return;
+    if (!entry || !entry.alive) return;
     // Drop no-op resizes: a same-size resize still makes the shell redraw its
     // prompt (doubled-prompt cause). Only forward genuine size changes.
     if (cols === entry.cols && rows === entry.rows) return;
     entry.cols = cols;
     entry.rows = rows;
-    entry.pty.resize(cols, rows);
+    if (!entry.ready) {
+      entry.resizePending = true;
+      return;
+    }
+    try { entry.pty.resize(cols, rows); } catch { /* process exited after the alive check */ }
   }
 
   kill(id: SurfaceId): void {

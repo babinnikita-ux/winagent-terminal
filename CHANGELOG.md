@@ -8,6 +8,10 @@ All notable changes are documented here.
 
 - Release artifact names, build/release documentation and security policy now
   use the WinAgent Terminal identity.
+- Packaged Claude Code hooks now use the WinAgent pipe contract and are bundled
+  with the installer.
+- Deferred ConPTY resize is guarded until the Windows PTY agent is ready, which
+  prevents an exit/resize race from crashing the test or application process.
 
 ## [0.3.0] - 2026-07-18
 

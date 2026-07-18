@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { applyWmuxHooks } from '../../src/main/claude-context';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const HOOK = '/res/cli/wmux-hook.js';
 
@@ -7,6 +9,12 @@ const wmuxCmds = (entries: any[]): string[] =>
   entries.flatMap((e) => (e.hooks || []).map((h: any) => h.command as string));
 
 describe('applyWmuxHooks (issue #53)', () => {
+  it('uses the WinAgent pipe contract in the packaged hook helper', () => {
+    const source = fs.readFileSync(path.join(process.cwd(), 'src/cli/wmux-hook.ts'), 'utf-8');
+    expect(source).toContain('WINAGENT_PIPE');
+    expect(source).toContain('winagent-terminal');
+  });
+
   it('installs PostToolUse, Notification and Stop wmux hooks', () => {
     const out = applyWmuxHooks({}, HOOK);
 

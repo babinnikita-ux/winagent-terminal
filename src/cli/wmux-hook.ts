@@ -23,9 +23,9 @@ if (argv[0] === '--event') {
   tool = argv[0] || 'unknown';
 }
 
-const pipePath = process.env.WMUX_PIPE || '\\\\.\\pipe\\wmux';
-const token = process.env.WMUX_PIPE_TOKEN || '';
-const surfaceId = process.env.WMUX_SURFACE_ID || '';
+const pipePath = process.env.WINAGENT_PIPE || process.env.WMUX_PIPE || '\\\\.\\pipe\\winagent-terminal';
+const token = process.env.WINAGENT_PIPE_TOKEN || process.env.WMUX_PIPE_TOKEN || '';
+const surfaceId = process.env.WINAGENT_SURFACE_ID || process.env.WMUX_SURFACE_ID || '';
 
 let stdinData = '';
 let sent = false;
