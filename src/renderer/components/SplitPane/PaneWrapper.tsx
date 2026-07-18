@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { PaneId, SplitNode, SurfaceId, WorkspaceId, QuickLaunchProfile, ShellInfo } from '../../../shared/types';
+import { AgentPreset, PaneId, SplitNode, SurfaceId, WorkspaceId, QuickLaunchProfile, ShellInfo } from '../../../shared/types';
 import { findLeaf, removeLeaf, splitNode } from '../../store/split-utils';
 import TerminalPane from '../Terminal/TerminalPane';
 import BrowserPane from '../Browser/BrowserPane';
@@ -214,6 +214,8 @@ export default function PaneWrapper({
               cwd={surface.cwd || workspace?.cwd}
               colorScheme={surface.colorScheme}
               startupCommands={surface.startupCommands}
+              agentPreset={surface.agentPreset}
+              resumeAgentSession={surface.resumeAgentSession}
               focused={isFocused && isActive}
               visible={isVisible}
               showFindBar={findBarVisible && isFocused && isActive}
@@ -282,6 +284,16 @@ export default function PaneWrapper({
     if (activeWorkspaceId) {
       addSurface(activeWorkspaceId, paneId, 'terminal', { shell: shell.command });
     }
+  };
+
+  const handleNewAgent = (agentPreset: AgentPreset, resumeAgentSession: boolean) => {
+    if (!activeWorkspaceId) return;
+    const label = agentPreset === 'claude-code' ? 'Claude Code' : 'Codex';
+    addSurface(activeWorkspaceId, paneId, 'terminal', {
+      agentPreset,
+      resumeAgentSession,
+      customTitle: resumeAgentSession ? `${label} (resume)` : label,
+    });
   };
 
   const quickLaunchProfiles = useMemo(
@@ -531,6 +543,7 @@ export default function PaneWrapper({
         onNewShell={handleNewSurfaceShell}
         profiles={quickLaunchProfiles}
         onNewProfile={handleNewSurfaceProfile}
+        onNewAgent={handleNewAgent}
         onClosePane={handleClosePane}
         onSplitRight={handleSplitRight}
         onSplitDown={handleSplitDown}

@@ -5,6 +5,7 @@ import { execFileSync, spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import { SurfaceId } from '../shared/types';
 import { getPipePath, readPipeToken } from '../shared/instance';
+import { buildAgentLaunch, getAgentStartupCommand } from './proxyapi';
 
 // ─── Shell resolution ──────────────────────────────────────────────────────
 // Validates that a shell executable exists before spawning.
@@ -225,6 +226,9 @@ export interface CreateOptions {
    *  they are baked into the shell's own startup (see `startupCommandsConsumed`
    *  in the return value) rather than injected later as keystrokes. */
   startupCommands?: string[];
+  /** Trusted preset identifier, resolved to credentials only in this process. */
+  agentPreset?: import('../shared/types').AgentPreset;
+  resumeAgentSession?: boolean;
 }
 
 // Primary Device Attributes (DA1). oh-my-posh / PSReadLine probe the terminal
@@ -292,9 +296,11 @@ export class PtyManager {
     const processEnvClean = Object.fromEntries(
       Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
     );
+    const agentLaunch = options.agentPreset ? buildAgentLaunch(options.agentPreset) : undefined;
     const env: { [key: string]: string } = {
       ...processEnvClean,
       ...options.env,
+      ...agentLaunch?.env,
       WMUX: '1',
       WMUX_SURFACE_ID: id,
       WMUX_PIPE: getPipePath(),
@@ -328,7 +334,12 @@ export class PtyManager {
     // the race: they run during init and the first prompt render — the only one
     // that triggers the leaky query — happens afterward, exactly as it does for a
     // plain terminal that shows no junk.
-    const startupCommands = (options.startupCommands ?? []).filter(
+    const startupCommands = [
+      ...(options.startupCommands ?? []),
+      ...(agentLaunch && options.agentPreset
+        ? [getAgentStartupCommand(options.agentPreset, Boolean(options.resumeAgentSession))]
+        : []),
+    ].filter(
       (cmd): cmd is string => typeof cmd === 'string' && cmd.trim().length > 0,
     );
     let startupCommandsConsumed = false;

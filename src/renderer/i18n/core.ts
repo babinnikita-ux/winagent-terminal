@@ -28,6 +28,7 @@ const en: Dict = {
   'settings.tab.sidebar': 'Sidebar',
   'settings.tab.workspace': 'Workspace',
   'settings.tab.terminal': 'Terminal',
+  'settings.tab.ai': 'AI',
   'settings.tab.notifications': 'Notifications',
   'settings.tab.browser': 'Browser',
   'settings.tab.profiles': 'Profiles',

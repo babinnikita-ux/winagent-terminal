@@ -8,10 +8,11 @@ import BrowserSettings from './BrowserSettings';
 import KeyboardSettings from './KeyboardSettings';
 import QuickLaunchSettings from './QuickLaunchSettings';
 import HelpSettings from './HelpSettings';
+import AgentSettings from './AgentSettings';
 import { useT } from '../../i18n';
 import '../../styles/settings.css';
 
-const TABS = ['General', 'Sidebar', 'Workspace', 'Terminal', 'Notifications', 'Browser', 'Profiles', 'Shortcuts', 'Help'] as const;
+const TABS = ['General', 'Sidebar', 'Workspace', 'Terminal', 'AI', 'Notifications', 'Browser', 'Profiles', 'Shortcuts', 'Help'] as const;
 
 // Map each tab to its i18n key (issue #56). Falls back to the English label.
 const TAB_LABEL_KEYS: Record<typeof TABS[number], string> = {
@@ -19,6 +20,7 @@ const TAB_LABEL_KEYS: Record<typeof TABS[number], string> = {
   Sidebar: 'settings.tab.sidebar',
   Workspace: 'settings.tab.workspace',
   Terminal: 'settings.tab.terminal',
+  AI: 'settings.tab.ai',
   Notifications: 'settings.tab.notifications',
   Browser: 'settings.tab.browser',
   Profiles: 'settings.tab.profiles',
@@ -65,6 +67,7 @@ export default function SettingsWindow({ onClose }: SettingsWindowProps) {
             {activeTab === 'Sidebar' && <SidebarSettings />}
             {activeTab === 'Workspace' && <WorkspaceSettings />}
             {activeTab === 'Terminal' && <TerminalSettings />}
+            {activeTab === 'AI' && <AgentSettings />}
             {activeTab === 'Notifications' && <NotificationSettings />}
             {activeTab === 'Browser' && <BrowserSettings />}
             {activeTab === 'Profiles' && <QuickLaunchSettings />}

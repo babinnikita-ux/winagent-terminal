@@ -10,6 +10,7 @@ export type SplitNode =
   | { type: 'branch'; direction: 'horizontal' | 'vertical'; ratio: number; children: [SplitNode, SplitNode] };
 
 export type SurfaceType = 'terminal' | 'browser' | 'markdown' | 'diff';
+export type AgentPreset = 'claude-code' | 'codex';
 
 export interface SurfaceRef {
   id: SurfaceId;
@@ -24,6 +25,10 @@ export interface SurfaceRef {
   currentCwd?: string;
   /** Commands run once after the terminal PTY spawns (quick-launch profiles — issue #32). */
   startupCommands?: string[];
+  /** A main-process managed AI launch. Credentials never enter this object. */
+  agentPreset?: AgentPreset;
+  /** Start the CLI's native resume selector instead of a fresh agent session. */
+  resumeAgentSession?: boolean;
   /** Initial URL for a browser surface created from a quick-launch profile (issue #32). */
   url?: string;
   /** Rendered markdown content for a `markdown` surface (issue #54). Persisted so
@@ -300,6 +305,7 @@ export const IPC_CHANNELS = {
   AGENT_SPAWN_BATCH: 'agent:spawn-batch',
   AGENT_STATUS: 'agent:status',
   AGENT_LIST: 'agent:list',
+  AGENT_READINESS: 'agent:readiness',
   AGENT_KILL: 'agent:kill',
   AGENT_UPDATE: 'agent:update',
   // CDP (browser.* pipe methods map to these internal IPC channels)

@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { v4 as uuid } from 'uuid';
-import { WorkspaceId, PaneId, SurfaceId, SurfaceRef, SurfaceType } from '../../shared/types';
+import { AgentPreset, WorkspaceId, PaneId, SurfaceId, SurfaceRef, SurfaceType } from '../../shared/types';
 import { findLeaf, removeLeaf, splitNode, getAllPaneIds } from './split-utils';
 import { killSurfacePty } from './pty-teardown';
 import { WorkspaceSlice } from './workspace-slice';
@@ -23,6 +23,8 @@ export interface SurfaceSlice {
       shell?: string;
       cwd?: string;
       startupCommands?: string[];
+      agentPreset?: AgentPreset;
+      resumeAgentSession?: boolean;
       url?: string;
     },
   ) => SurfaceId | null;
@@ -90,6 +92,8 @@ interface ClosedSurface {
   shell?: string;
   cwd?: string;
   startupCommands?: string[];
+  agentPreset?: AgentPreset;
+  resumeAgentSession?: boolean;
   url?: string;
 }
 const closedSurfaceStack: ClosedSurface[] = [];
@@ -106,6 +110,8 @@ function pushClosedSurface(surface: SurfaceRef): void {
     shell: surface.shell,
     cwd: surface.cwd,
     startupCommands: surface.startupCommands,
+    agentPreset: surface.agentPreset,
+    resumeAgentSession: surface.resumeAgentSession,
     url: surface.url,
   });
   if (closedSurfaceStack.length > MAX_CLOSED_SURFACES) closedSurfaceStack.shift();
@@ -132,6 +138,8 @@ export const createSurfaceSlice: StateCreator<SliceState, [], [], SurfaceSlice> 
       ...(options?.shell ? { shell: options.shell } : {}),
       ...(options?.cwd ? { cwd: options.cwd } : {}),
       ...(options?.startupCommands?.length ? { startupCommands: options.startupCommands } : {}),
+      ...(options?.agentPreset ? { agentPreset: options.agentPreset } : {}),
+      ...(options?.resumeAgentSession ? { resumeAgentSession: true } : {}),
       ...(options?.url ? { url: options.url } : {}),
     };
     const newSurfaces = [...leaf.surfaces, newSurface];
@@ -280,6 +288,8 @@ export const createSurfaceSlice: StateCreator<SliceState, [], [], SurfaceSlice> 
       ...(restored.shell ? { shell: restored.shell } : {}),
       ...(restored.cwd ? { cwd: restored.cwd } : {}),
       ...(restored.startupCommands ? { startupCommands: restored.startupCommands } : {}),
+      ...(restored.agentPreset ? { agentPreset: restored.agentPreset } : {}),
+      ...(restored.resumeAgentSession ? { resumeAgentSession: true } : {}),
       ...(restored.url ? { url: restored.url } : {}),
     });
   },

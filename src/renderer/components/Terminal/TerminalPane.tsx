@@ -3,6 +3,7 @@ import { useTerminal } from '../../hooks/useTerminal';
 import FindBar from './FindBar';
 import CopyMode from './CopyMode';
 import '../../styles/terminal.css';
+import { AgentPreset } from '../../../shared/types';
 
 interface TerminalPaneProps {
   surfaceId?: string;
@@ -12,6 +13,8 @@ interface TerminalPaneProps {
   colorScheme?: string;
   /** Quick-launch profile startup commands (issue #32). */
   startupCommands?: string[];
+  agentPreset?: AgentPreset;
+  resumeAgentSession?: boolean;
   focused?: boolean;
   visible?: boolean;
   showFindBar?: boolean;
@@ -25,13 +28,15 @@ export default function TerminalPane({
   cwd,
   colorScheme,
   startupCommands,
+  agentPreset,
+  resumeAgentSession,
   focused = true,
   visible = true,
   showFindBar = false,
   onFindBarClose,
   copyModeActive = false,
 }: TerminalPaneProps) {
-  const { terminalRef, searchAddonRef } = useTerminal({ surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands });
+  const { terminalRef, searchAddonRef } = useTerminal({ surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands, agentPreset, resumeAgentSession });
 
   const [_lastQuery, setLastQuery] = useState('');
 

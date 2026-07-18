@@ -1,6 +1,6 @@
 # WinAgent Terminal architecture
 
-## Milestone 1 scope
+## Terminal and AI launch boundary
 
 ```text
 Window
@@ -26,6 +26,10 @@ Preload exposes a constrained API instead of Electron primitives. Renderer IPC
 is checked in the main process. The terminal receives only explicitly selected
 shell, working directory, dimensions and environment values.
 
-Future provider credentials, browser automation and named-pipe commands are
-outside Milestone 1 and must not be trusted merely because they originate in a
-renderer, shell, or local process.
+ProxyAPI launch presets are resolved only in the main process. The renderer
+passes a fixed `claude-code` or `codex` identifier, never a credential; the key
+is read from `PROXYAPI_KEY` only while spawning the child process. Codex receives
+an isolated, credential-free provider TOML, while Claude Code receives its
+ProxyAPI endpoint through child-process environment variables. Browser
+automation and named-pipe commands remain later milestones and must not be
+trusted merely because they originate in a renderer, shell, or local process.

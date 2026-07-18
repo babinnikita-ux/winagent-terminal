@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { SurfaceRef, SurfaceId, PaneId, QuickLaunchProfile, ShellInfo } from '../../../shared/types';
+import { AgentPreset, SurfaceRef, SurfaceId, PaneId, QuickLaunchProfile, ShellInfo } from '../../../shared/types';
 import { useStore } from '../../store';
 import { ShortcutAction, ShortcutBinding } from '../../store/settings-slice';
 import { IconAdd, IconSplit, IconSplitDown, IconClose, IconCaret } from './icons';
@@ -23,6 +23,7 @@ interface SurfaceTabBarProps {
   /** Quick-launch profiles surfaced in the `+` caret dropdown (issue #32). */
   profiles?: QuickLaunchProfile[];
   onNewProfile?: (profile: QuickLaunchProfile) => void;
+  onNewAgent?: (agentPreset: AgentPreset, resumeAgentSession: boolean) => void;
   onClosePane?: () => void;
   onSplitRight?: () => void;
   onSplitDown?: () => void;
@@ -61,6 +62,7 @@ export default function SurfaceTabBar({
   onNewShell,
   profiles,
   onNewProfile,
+  onNewAgent,
   onClosePane,
   onSplitRight,
   onSplitDown,
@@ -204,6 +206,11 @@ export default function SurfaceTabBar({
     onNewProfile?.(profile);
   }, [onNewProfile]);
 
+  const pickAgent = useCallback((agentPreset: AgentPreset, resumeAgentSession: boolean) => {
+    setOpenMenu(null);
+    onNewAgent?.(agentPreset, resumeAgentSession);
+  }, [onNewAgent]);
+
   const pickSplit = useCallback((dir: 'right' | 'down') => {
     setOpenMenu(null);
     if (dir === 'right') onSplitRight?.();
@@ -270,7 +277,7 @@ export default function SurfaceTabBar({
         {surfaces.map((surface, index) => {
           const isActive = index === activeSurfaceIndex;
           const agentMeta = getAgentMeta(surface.id);
-          const isAgent = !!agentMeta;
+          const isAgent = !!agentMeta || !!surface.agentPreset;
           const isRenaming = renamingId === surface.id;
           const progress = surfaceProgress[surface.id];
           return (
@@ -453,6 +460,23 @@ export default function SurfaceTabBar({
               <button role="menuitem" onClick={() => pickNew('markdown')}>
                 <span className="surface-tab-menu__icon">{surfaceIcon('markdown', false)}</span> Markdown
               </button>
+              {onNewAgent && (
+                <>
+                  <div className="surface-tab-menu__sep" role="separator" />
+                  <button role="menuitem" onClick={() => pickAgent('claude-code', false)}>
+                    <span className="surface-tab-menu__icon">AI</span> Claude Code via ProxyAPI
+                  </button>
+                  <button role="menuitem" onClick={() => pickAgent('codex', false)}>
+                    <span className="surface-tab-menu__icon">AI</span> Codex via ProxyAPI
+                  </button>
+                  <button role="menuitem" onClick={() => pickAgent('claude-code', true)}>
+                    <span className="surface-tab-menu__icon">↻</span> Resume Claude Code
+                  </button>
+                  <button role="menuitem" onClick={() => pickAgent('codex', true)}>
+                    <span className="surface-tab-menu__icon">↻</span> Resume Codex
+                  </button>
+                </>
+              )}
               {profiles && profiles.length > 0 && (
                 <>
                   <div className="surface-tab-menu__sep" role="separator" />

@@ -19,6 +19,7 @@ import { AgentManager } from './agent-manager';
 import { saveNamedSession, loadNamedSession, listNamedSessions, deleteNamedSession, loadSession } from './session-persistence';
 import { loadSettings, saveSetting } from './settings-store';
 import { getChangedFiles, getFileDiff } from './diff-provider';
+import { getAgentReadiness } from './proxyapi';
 
 const ptyManager = new PtyManager();
 const notificationManager = new NotificationManager();
@@ -234,6 +235,7 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
   ipcMain.handle(IPC_CHANNELS.AGENT_LIST, async (_event, workspaceId?: string) => {
     return agentManager.list(workspaceId as WorkspaceId | undefined);
   });
+  ipcMain.handle(IPC_CHANNELS.AGENT_READINESS, () => getAgentReadiness());
   ipcMain.handle(IPC_CHANNELS.AGENT_STATUS, async (_event, agentId: string) => {
     return agentManager.getStatus(agentId as AgentId);
   });

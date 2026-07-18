@@ -9,7 +9,7 @@ import { SerializeAddon } from '@xterm/addon-serialize';
 import { ProgressAddon } from '@xterm/addon-progress';
 import { useStore } from '../store';
 import { collectActiveTerminalSurfaceIds } from '../store/split-utils';
-import { SplitNode, ThemeConfig } from '../../shared/types';
+import { AgentPreset, SplitNode, ThemeConfig } from '../../shared/types';
 import { UserColorScheme } from '../store/settings-slice';
 import { openInWmuxBrowser } from '../utils/open-in-browser';
 import { attachVisibleRenderer, RendererHandle } from '../utils/terminal-renderer';
@@ -38,6 +38,9 @@ interface UseTerminalOptions {
   colorScheme?: string;
   /** Quick-launch profile commands, run once after the PTY is first created (issue #32). */
   startupCommands?: string[];
+  /** Main-process launch preset; never contains credential material. */
+  agentPreset?: AgentPreset;
+  resumeAgentSession?: boolean;
 }
 
 interface UseTerminalResult {
@@ -330,7 +333,7 @@ async function fetchTheme(name: string): Promise<ThemeConfig> {
   }
 }
 
-export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = true, colorScheme, startupCommands }: UseTerminalOptions = {}): UseTerminalResult {
+export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = true, colorScheme, startupCommands, agentPreset, resumeAgentSession }: UseTerminalOptions = {}): UseTerminalResult {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -794,7 +797,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
           attachToPty(surfaceId!);
         } else {
           // No existing PTY — create a new one, passing surfaceId so PTY ID = Surface ID
-          window.wmux.pty.create({ shell: effectiveShell, cwd: cwd ?? '', env: {}, surfaceId, startupCommands: startupCommandsRef.current, cols: initialCols, rows: initialRows })
+          window.wmux.pty.create({ shell: effectiveShell, cwd: cwd ?? '', env: {}, surfaceId, startupCommands: startupCommandsRef.current, agentPreset, resumeAgentSession, cols: initialCols, rows: initialRows })
             .then((created: { id: string; shell: string; startupCommandsConsumed?: boolean }) => {
               // PTY persists (keep-alive); a remount re-attaches via pty.has.
               if (disposed) return;
@@ -807,7 +810,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
       });
     } else {
       // No surfaceId hint — always create new PTY
-      window.wmux.pty.create({ shell: effectiveShell, cwd: cwd ?? '', env: {}, startupCommands: startupCommandsRef.current, cols: initialCols, rows: initialRows })
+      window.wmux.pty.create({ shell: effectiveShell, cwd: cwd ?? '', env: {}, startupCommands: startupCommandsRef.current, agentPreset, resumeAgentSession, cols: initialCols, rows: initialRows })
         .then((created: { id: string; shell: string; startupCommandsConsumed?: boolean }) => {
           if (disposed) return;
           setResolvedShellForSurface(surfaceId, created.shell);

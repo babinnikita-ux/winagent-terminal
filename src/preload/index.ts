@@ -3,7 +3,7 @@ import { IPC_CHANNELS } from '../shared/types';
 
 contextBridge.exposeInMainWorld('wmux', {
   pty: {
-    create: (options: { shell: string; cwd: string; env: Record<string, string>; surfaceId?: string; startupCommands?: string[]; cols?: number; rows?: number }) =>
+    create: (options: { shell: string; cwd: string; env: Record<string, string>; surfaceId?: string; startupCommands?: string[]; agentPreset?: 'claude-code' | 'codex'; resumeAgentSession?: boolean; cols?: number; rows?: number }) =>
       ipcRenderer.invoke(IPC_CHANNELS.PTY_CREATE, options) as Promise<{ id: string; shell: string; startupCommandsConsumed?: boolean }>,
     write: (id: string, data: string) =>
       ipcRenderer.send(IPC_CHANNELS.PTY_WRITE, id, data),
@@ -89,6 +89,7 @@ contextBridge.exposeInMainWorld('wmux', {
   agent: {
     list: (workspaceId?: string) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_LIST, workspaceId),
     status: (agentId: string) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_STATUS, agentId),
+    readiness: () => ipcRenderer.invoke(IPC_CHANNELS.AGENT_READINESS),
     onUpdate: (callback: (agent: any) => void) => {
       const handler = (_event: any, agent: any) => callback(agent);
       ipcRenderer.on(IPC_CHANNELS.AGENT_UPDATE, handler);
