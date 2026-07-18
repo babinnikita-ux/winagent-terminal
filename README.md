@@ -25,7 +25,8 @@ npm.cmd run dev
 
 See [Architecture](docs/ARCHITECTURE.md), the
 [architecture decision](docs/ARCHITECTURE_DECISION.md), and
-[Russian quick start](README_RU.md).
+[Russian quick start](README_RU.md), [Windows build guide](docs/BUILD_WINDOWS.md)
+and [troubleshooting](docs/TROUBLESHOOTING.md).
 
 ## License and attribution
 

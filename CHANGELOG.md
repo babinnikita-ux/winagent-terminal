@@ -2,6 +2,13 @@
 
 All notable changes are documented here.
 
+## [0.4.0] - 2026-07-18
+
+### Changed
+
+- Release artifact names, build/release documentation and security policy now
+  use the WinAgent Terminal identity.
+
 ## [0.3.0] - 2026-07-18
 
 ### Added

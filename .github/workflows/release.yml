@@ -94,7 +94,7 @@ jobs:
             -F "signingPolicySlug=wmux" \
             -F "artifactConfigurationSlug=initial" \
             -F "description=CI release v${{ steps.version.outputs.version }}" \
-            -F "artifact=@release/wmux-${{ steps.version.outputs.version }}-setup.exe" \
+            -F "artifact=@release/winagent-terminal-${{ steps.version.outputs.version }}-setup.exe" \
             -D headers.txt \
             "https://app.signpath.io/api/v1/$SIGNPATH_ORGANIZATION_ID/SigningRequests/SubmitWithArtifact")
           HTTP_CODE=$(echo "$HTTP_RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
@@ -139,9 +139,9 @@ jobs:
         run: |
           curl -s \
             -H "Authorization: Bearer $SIGNPATH_API_TOKEN" \
-            -o "release/wmux-${{ steps.version.outputs.version }}-setup.exe" \
+            -o "release/winagent-terminal-${{ steps.version.outputs.version }}-setup.exe" \
             "https://app.signpath.io/api/v1/$SIGNPATH_ORGANIZATION_ID/SigningRequests/${{ steps.sign-submit.outputs.signing_request_id }}/SignedArtifact"
-          echo "Signed installer downloaded, size: $(wc -c < release/wmux-${{ steps.version.outputs.version }}-setup.exe) bytes"
+          echo "Signed installer downloaded, size: $(wc -c < release/winagent-terminal-${{ steps.version.outputs.version }}-setup.exe) bytes"
           # trusted=true only for a chain-valid Authenticode signature. A
           # SignPath project can also sign with a SELF-SIGNED certificate
           # (e.g. while the OSS "SignPath Foundation" cert is unavailable,
@@ -152,7 +152,7 @@ jobs:
           # so a self-signed installer downloads and then fails to install,
           # which is exactly the endless-update loop of issue #96.
           powershell -NoProfile -Command "
-            \$sig = Get-AuthenticodeSignature 'release/wmux-${{ steps.version.outputs.version }}-setup.exe';
+            \$sig = Get-AuthenticodeSignature 'release/winagent-terminal-${{ steps.version.outputs.version }}-setup.exe';
             \$subject = if (\$sig.SignerCertificate) { \$sig.SignerCertificate.Subject } else { '(none)' };
             Write-Host ('Status: ' + \$sig.Status + ' — Subject: ' + \$subject);
             \$trusted = if (\$sig.Status -eq 'Valid') { 'true' } else { 'false' };
@@ -173,7 +173,7 @@ jobs:
         shell: pwsh
         run: |
           Compress-Archive -Path "release/win-unpacked/*" `
-            -DestinationPath "wmux-${{ steps.version.outputs.version }}-win-x64.zip"
+            -DestinationPath "winagent-terminal-${{ steps.version.outputs.version }}-win-x64.zip"
 
       # ── Generate latest.yml for electron-updater ──────────
       # Gated on a CHAIN-TRUSTED signature (sign-verify sets trusted=true).
@@ -201,7 +201,7 @@ jobs:
             const crypto = require('crypto');
             const fs = require('fs');
             const version = '${{ steps.version.outputs.version }}';
-            const installer = 'wmux-' + version + '-setup.exe';
+            const installer = 'winagent-terminal-' + version + '-setup.exe';
             const data = fs.readFileSync('release/' + installer);
             const sha512 = crypto.createHash('sha512').update(data).digest('base64');
             const size = data.length;
@@ -224,10 +224,10 @@ jobs:
       - name: Upload release artifacts as workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wmux-release
+          name: winagent-terminal-release
           path: |
-            release/wmux-${{ steps.version.outputs.version }}-setup.exe
-            wmux-${{ steps.version.outputs.version }}-win-x64.zip
+            release/winagent-terminal-${{ steps.version.outputs.version }}-setup.exe
+            winagent-terminal-${{ steps.version.outputs.version }}-win-x64.zip
             latest.yml
 
       # ── GitHub Release ─────────────────────────────────────
@@ -235,10 +235,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: wmux ${{ steps.version.outputs.tag }}
+          name: WinAgent Terminal ${{ steps.version.outputs.tag }}
           files: |
-            release/wmux-${{ steps.version.outputs.version }}-setup.exe
-            wmux-${{ steps.version.outputs.version }}-win-x64.zip
+            release/winagent-terminal-${{ steps.version.outputs.version }}-setup.exe
+            winagent-terminal-${{ steps.version.outputs.version }}-win-x64.zip
             latest.yml
           draft: false
           generate_release_notes: true

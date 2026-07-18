@@ -26,3 +26,5 @@ npm.cmd run dev
 Архитектурное решение: [docs/ARCHITECTURE_DECISION.md](docs/ARCHITECTURE_DECISION.md).
 Модель угроз: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 Настройка ProxyAPI: [docs/PROXYAPI_SETUP.md](docs/PROXYAPI_SETUP.md).
+Сборка Windows: [docs/BUILD_WINDOWS.md](docs/BUILD_WINDOWS.md).
+Устранение неполадок: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).

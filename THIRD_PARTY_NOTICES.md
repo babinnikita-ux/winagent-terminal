@@ -7,9 +7,9 @@ WinAgent Terminal is derived from
 License. The upstream MIT `LICENSE` file is retained in this repository.
 
 Changes in this distribution include the WinAgent Terminal product identity,
-architecture/security documentation, source attribution, and Milestone 1
-hardening. Upstream branding, logo and release identity are not used as this
-product's branding.
+architecture/security documentation, source attribution, hardened browser and
+IPC boundaries, and WinAgent release identity. Upstream branding, logo and
+release identity are not used as this product's branding.
 
 ## Dependency notices
 
