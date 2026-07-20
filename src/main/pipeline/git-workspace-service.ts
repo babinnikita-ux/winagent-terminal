@@ -48,7 +48,7 @@ export class GitWorkspaceService {
   preflight(repositoryPath: string): GitPreflight {
     const resolved = path.resolve(repositoryPath);
     if (!fs.existsSync(resolved)) throw new Error('GIT_CONFLICT: папка репозитория не существует.');
-    if (git(resolved, ['rev-parse', '--is-inside-work-tree']) !== 'true') {
+    if (!this.isGitRepository(resolved)) {
       throw new Error('GIT_CONFLICT: выбранная папка не является Git-репозиторием.');
     }
     return {
@@ -101,6 +101,14 @@ export class GitWorkspaceService {
       return branch || null;
     } catch {
       return null;
+    }
+  }
+
+  private isGitRepository(repositoryPath: string): boolean {
+    try {
+      return git(repositoryPath, ['rev-parse', '--is-inside-work-tree']) === 'true';
+    } catch {
+      return false;
     }
   }
 }

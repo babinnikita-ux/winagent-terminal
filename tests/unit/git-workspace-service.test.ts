@@ -27,6 +27,15 @@ beforeEach(() => {
 afterEach(() => fs.rmSync(ROOT, { recursive: true, force: true }));
 
 describe('GitWorkspaceService', () => {
+  it('explains when the selected folder is not a Git repository', () => {
+    const folder = path.join(ROOT, 'not-a-repository');
+    fs.mkdirSync(folder, { recursive: true });
+
+    expect(() => new GitWorkspaceService(WORKTREES).preflight(folder)).toThrow(
+      'Git-репозиторием',
+    );
+  });
+
   it('creates a separate run branch and ignores only local run artifacts', () => {
     const service = new GitWorkspaceService(WORKTREES);
     const preflight = service.preflight(REPO);
