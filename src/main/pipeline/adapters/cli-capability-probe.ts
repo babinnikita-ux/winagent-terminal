@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { ProcessSupervisor } from '../process-supervisor';
 import { PipelineProvider, pipelineProviderSchema } from '../schemas';
+import { resolveOfficialCliLaunch } from './cli-launch-resolver';
 
 export type CapabilityReason = 'RUNTIME_NOT_FOUND' | 'UNSUPPORTED_VERSION' | 'PROCESS_CRASH' | 'TIMEOUT';
 
@@ -14,12 +15,6 @@ export interface CliCapability {
   reason?: CapabilityReason;
   details: string;
 }
-
-const CLI_NAMES: Record<PipelineProvider, string> = {
-  codex: 'codex',
-  claude: 'claude',
-  gemini: 'gemini',
-};
 
 function executableCandidates(command: string): string[] {
   if (path.extname(command)) return [command];
@@ -50,12 +45,13 @@ export class CliCapabilityProbe {
 
   async probe(providerInput: PipelineProvider): Promise<CliCapability> {
     const provider = pipelineProviderSchema.parse(providerInput);
-    const executable = findExecutable(CLI_NAMES[provider], this.environment);
+    const launch = resolveOfficialCliLaunch(provider, this.environment);
+    const executable = launch?.executable;
     if (!executable) {
       return { provider, available: false, auth: 'unknown', reason: 'RUNTIME_NOT_FOUND', details: 'Официальный CLI не найден в PATH.' };
     }
 
-    const invocation = this.supervisor.start({ executable, args: ['--version'], cwd: process.cwd(), timeoutMs: 10_000, env: this.environment });
+    const invocation = this.supervisor.start({ executable, args: [...launch.argsPrefix, '--version'], cwd: process.cwd(), timeoutMs: 10_000, env: this.environment });
     const result = await invocation.result;
     const output = `${result.stdout}\n${result.stderr}`.trim();
     const classified = classifyCapabilityOutput(output);

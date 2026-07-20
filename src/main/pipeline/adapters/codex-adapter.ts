@@ -3,6 +3,7 @@ import { ProcessSupervisor, SupervisedProcess } from '../process-supervisor';
 import { PipelineFailureCode, PipelineProvider, StageResult } from '../schemas';
 import { AgentAdapter, AgentExecutionRequest } from './agent-adapter';
 import { CliCapability, CliCapabilityProbe } from './cli-capability-probe';
+import { prepareOfficialCliCommand } from './cli-launch-resolver';
 
 export interface SubscriptionPreflight {
   provider: PipelineProvider;
@@ -114,7 +115,7 @@ export class CodexAdapter implements AgentAdapter {
   }
 
   execute(request: AgentExecutionRequest): SupervisedProcess {
-    return this.supervisor.start(this.buildCommand(request));
+    return this.supervisor.start(prepareOfficialCliCommand(this.provider, this.buildCommand(request)));
   }
 
   private assertRequest(request: AgentExecutionRequest): void {

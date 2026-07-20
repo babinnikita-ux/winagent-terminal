@@ -2,6 +2,7 @@ import { ProcessSupervisor, SupervisedProcess } from '../process-supervisor';
 import { PipelineStage, StageResult } from '../schemas';
 import { AgentAdapter, AgentExecutionRequest } from './agent-adapter';
 import { CliCapability, CliCapabilityProbe } from './cli-capability-probe';
+import { prepareOfficialCliCommand } from './cli-launch-resolver';
 
 interface ClaudeAdapterOptions {
   executable?: string;
@@ -86,7 +87,7 @@ export class ClaudeAdapter implements AgentAdapter {
   }
 
   execute(request: AgentExecutionRequest): SupervisedProcess {
-    return this.supervisor.start(this.buildCommand(request));
+    return this.supervisor.start(prepareOfficialCliCommand(this.provider, this.buildCommand(request)));
   }
 
   private assertReadOnlyStage(stage: PipelineStage): void {
