@@ -43,6 +43,7 @@
     { "from": "src/shell-integration", "to": "shell-integration" },
     { "from": "dist/cli", "to": "cli" },
     { "from": "src/cli-bin", "to": "cli-bin" },
-    { "from": "resources/wmux-orchestrator", "to": "wmux-orchestrator" }
+    { "from": "resources/wmux-orchestrator", "to": "wmux-orchestrator" },
+    { "from": "resources/pipeline-prompts", "to": "pipeline-prompts" }
   ]
 }
