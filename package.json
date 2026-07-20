@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "concurrently \"vite --port 5199\" \"wait-on http://localhost:5199 && electron .\"",
     "build": "tsc -p tsconfig.node.json && vite build && electron-builder",
+    "build:installed": "npm run build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/update-installed.ps1 -Force",
     "build:main": "tsc -p tsconfig.node.json",
     "build:renderer": "vite build",
     "test": "vitest run",

@@ -1,5 +1,9 @@
 # WinAgent Terminal
 
+## Обновление локальной установки
+
+После изменений запустите `npm run build:installed`. Команда соберёт установщик, закроет запущенный WinAgent, бесшумно обновит существующую установку и откроет новую версию. Рабочие пространства и настройки не удаляются.
+
 Windows terminal multiplexer for parallel AI coding work. It is a
 keyboard-first desktop application built on Electron, React, xterm.js and
 ConPTY.
