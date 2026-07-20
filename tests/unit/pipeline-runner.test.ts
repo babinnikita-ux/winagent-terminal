@@ -72,6 +72,13 @@ class PausableAdapter extends FakeAdapter {
   }
 }
 
+class MutatingReadOnlyAdapter extends FakeAdapter {
+  execute(request: AgentExecutionRequest): SupervisedProcess {
+    fs.writeFileSync(path.join(request.cwd, 'policy-violation.txt'), 'unexpected mutation', 'utf8');
+    return successfulProcess('{"type":"result"}\n');
+  }
+}
+
 beforeEach(() => {
   fs.mkdirSync(REPO, { recursive: true });
   git(['init', '--initial-branch=main']);
@@ -155,5 +162,20 @@ describe('PipelineRunner', () => {
     expect(paused.status).toBe('paused_user');
     expect(paused.stages[0].status).toBe('paused');
     expect(paused.stages[1].status).toBe('pending');
+  });
+
+  it('stops when a read-only agent changes the isolated worktree', async () => {
+    const store = new PipelineStore(path.join(ROOT, 'state'));
+    const run = createPipelineRun({ id: RUN_ID, repositoryPath: REPO, task: 'Проверить policy violation.', autonomyMode: 'safe', executionMode: 'strict', useWorktree: true, now: '2026-07-20T10:00:00.000Z' });
+    const runner = new PipelineRunner({
+      store,
+      git: new GitWorkspaceService(path.join(ROOT, 'worktrees')),
+      promptAssembler: new PromptAssembler(path.resolve('resources/pipeline-prompts/v1')),
+      adapters: { codex: new MutatingReadOnlyAdapter('codex'), claude: new FakeAdapter('claude'), gemini: new FakeAdapter('gemini') },
+    });
+    const stopped = await runner.run(store.save(run));
+    expect(stopped.status).toBe('failed');
+    expect(stopped.failureReason).toContain('GIT_CONFLICT');
+    expect(stopped.stages[0].status).toBe('failed');
   });
 });
