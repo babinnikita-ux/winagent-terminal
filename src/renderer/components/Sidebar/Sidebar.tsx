@@ -31,6 +31,7 @@ interface SidebarProps {
   onSaveSession?: (name: string) => void;
   onLoadSession?: (name: string) => void;
   onCollapse?: () => void;
+  onOpenPipelines?: () => void;
 }
 
 export default function Sidebar({
@@ -49,6 +50,7 @@ export default function Sidebar({
   onSaveSession,
   onLoadSession,
   onCollapse,
+  onOpenPipelines,
 }: SidebarProps) {
   const [draggedId, setDraggedId] = useState<WorkspaceId | null>(null);
   const [dragOverId, setDragOverId] = useState<WorkspaceId | null>(null);
@@ -295,6 +297,13 @@ export default function Sidebar({
       </div>
 
       <div className="sidebar__footer">
+        <button
+          className="sidebar__pipelines-btn"
+          onClick={onOpenPipelines}
+          title="Открыть конвейеры"
+        >
+          <span aria-hidden>◈</span> Конвейеры
+        </button>
         <button
           className="sidebar__footer-btn"
           onClick={() => setSessionMenuMode(sessionMenuMode === 'save' ? null : 'save')}

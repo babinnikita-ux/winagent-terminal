@@ -350,6 +350,8 @@ export const IPC_CHANNELS = {
   PIPELINE_LIST: 'pipeline:list',
   PIPELINE_GET: 'pipeline:get',
   PIPELINE_CREATE_DRAFT: 'pipeline:create-draft',
+  PIPELINE_START: 'pipeline:start',
+  PIPELINE_CAPABILITIES: 'pipeline:capabilities',
 } as const;
 
 // ─── Orchestration state (wmux-orchestrator plugin) ────────────────────────

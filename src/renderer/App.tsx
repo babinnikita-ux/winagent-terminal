@@ -16,6 +16,7 @@ import ConfirmCloseDialog from './components/ConfirmCloseDialog';
 import BrowserPane from './components/Browser/BrowserPane';
 import Tutorial from './components/Tutorial/Tutorial';
 import SplitPreviewOverlay from './components/SplitPane/SplitPreviewOverlay';
+import PipelinePanel from './components/Pipeline/PipelinePanel';
 import { initPipeBridge } from './pipe-bridge';
 import { useUiTheme } from './hooks/useUiTheme';
 import type {
@@ -303,6 +304,7 @@ export default function App() {
 
   const [focusedPaneId, setFocusedPaneId] = useState<PaneId | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [pipelinesOpen, setPipelinesOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   // Shortcut cheat-sheet overlay (issue #64, toggled by F1 via wmux:toggle-cheatsheet).
   const [cheatSheetOpen, setCheatSheetOpen] = useState(false);
@@ -869,6 +871,7 @@ export default function App() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {tutorialOpen && <Tutorial onClose={handleTutorialClose} />}
       {settingsOpen && <SettingsWindow onClose={() => setSettingsOpen(false)} />}
+      {pipelinesOpen && <PipelinePanel onClose={() => setPipelinesOpen(false)} />}
       <Titlebar
         title={titlebarText}
         onHelpClick={() => setTutorialOpen(true)}
@@ -900,6 +903,7 @@ export default function App() {
             onSaveSession={handleSaveSession}
             onLoadSession={handleLoadSession}
             onCollapse={toggleSidebar}
+            onOpenPipelines={() => setPipelinesOpen(true)}
           />
         ) : (
           <div

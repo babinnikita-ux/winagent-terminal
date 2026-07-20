@@ -52,6 +52,24 @@
   position: relative;
 }
 
+.sidebar__pipelines-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  padding: 7px 8px;
+  border: 1px solid rgba(67, 183, 139, .26);
+  border-radius: 6px;
+  background: rgba(67, 183, 139, .08);
+  color: rgba(var(--ui-overlay-rgb), .82);
+  font: 600 11px/1 inherit;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.sidebar__pipelines-btn span { color: #55c99b; font-size: 13px; }
+.sidebar__pipelines-btn:hover { background: rgba(67, 183, 139, .14); border-color: rgba(67, 183, 139, .45); }
+
 .sidebar__new-btn {
   width: 100%;
   padding: 6px 0;

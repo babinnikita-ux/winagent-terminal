@@ -170,6 +170,8 @@ contextBridge.exposeInMainWorld('wmux', {
       executionMode?: 'strict' | 'best_effort';
       useWorktree?: boolean;
     }) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_CREATE_DRAFT, request),
+    start: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_START, runId),
+    capabilities: () => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_CAPABILITIES),
   },
   session: {
     save: (session: any) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_SAVE_NAMED, session),
