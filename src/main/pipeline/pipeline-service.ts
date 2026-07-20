@@ -88,6 +88,22 @@ export class PipelineService {
     return this.runner.cancel(runId);
   }
 
+  pause(runId: string): boolean {
+    return this.runner.pause(runId);
+  }
+
+  retry(runId: string): PipelineRun {
+    const run = this.store.get(runId);
+    if (!run) throw new Error('Конвейер не найден.');
+    if (!['paused_auth', 'paused_quota', 'paused_approval', 'paused_user'].includes(run.status)) {
+      throw new Error('Повтор доступен только для run на паузе.');
+    }
+    if (this.activeRuns.has(runId)) throw new Error('Конвейер уже выполняется.');
+    this.activeRuns.add(runId);
+    void this.runner.resume(run).finally(() => this.activeRuns.delete(runId));
+    return run;
+  }
+
   /** A crashed app never replays a writer stage. Recovery is an explicit user decision. */
   private recoverInterruptedRuns(): void {
     const activeStates = new Set<PipelineRun['status']>([

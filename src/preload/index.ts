@@ -172,6 +172,8 @@ contextBridge.exposeInMainWorld('wmux', {
     }) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_CREATE_DRAFT, request),
     start: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_START, runId),
     stop: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_STOP, runId),
+    pause: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_PAUSE, runId),
+    retry: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_RETRY, runId),
     capabilities: () => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_CAPABILITIES),
   },
   session: {

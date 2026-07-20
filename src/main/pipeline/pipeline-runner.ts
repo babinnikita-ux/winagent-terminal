@@ -4,6 +4,7 @@ import { GitWorkspaceService } from './git-workspace-service';
 import { PromptAssembler } from './prompt-assembler';
 import { ProcessResult, SupervisedProcess } from './process-supervisor';
 import {
+  resumePipelineState,
   stageForRunStatus,
   transitionPipelineState,
   transitionStageState,
@@ -33,6 +34,7 @@ const ACTIVE_STAGE_STATUSES: Record<PipelineStageId, PipelineRun['status']> = {
 export class PipelineRunner {
   private readonly activeProcesses = new Map<string, SupervisedProcess>();
   private readonly cancelledRuns = new Set<string>();
+  private readonly pausedRuns = new Set<string>();
 
   constructor(private readonly dependencies: PipelineRunnerDependencies) {}
 
@@ -41,6 +43,35 @@ export class PipelineRunner {
     const process = this.activeProcesses.get(runId);
     process?.cancel();
     return Boolean(process);
+  }
+
+  pause(runId: string): boolean {
+    this.pausedRuns.add(runId);
+    const process = this.activeProcesses.get(runId);
+    process?.cancel();
+    return Boolean(process);
+  }
+
+  async resume(initial: PipelineRun): Promise<PipelineRun> {
+    try {
+      if (!initial.worktreePath) throw new Error('Невозможно повторить этап без изолированного worktree.');
+      let run = resumePipelineState(initial);
+      const stageId = stageForRunStatus(run.status);
+      if (!stageId) throw new Error('Невозможно определить этап для повторного запуска.');
+      const stageIndex = run.stages.findIndex((stage) => stage.id === stageId);
+      if (stageIndex < 0) throw new Error('Этап отсутствует в run.');
+      const stage = run.stages[stageIndex];
+      if (stage.status === 'succeeded' || stage.status === 'skipped' || stage.status === 'cancelled') {
+        throw new Error('Этот этап нельзя повторить без создания нового run.');
+      }
+      // The user explicitly requested retry. A running/paused process from an
+      // interrupted app cannot be trusted, so it becomes a fresh pending stage.
+      run = this.replaceStage(run, { ...stage, status: 'pending', result: undefined }, undefined);
+      return this.runRemaining(run, stageIndex, new ArtifactStore(run.repositoryPath, run.id));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return this.save({ ...initial, failureReason: message, updatedAt: new Date().toISOString() });
+    }
   }
 
   async run(initial: PipelineRun): Promise<PipelineRun> {
@@ -53,11 +84,7 @@ export class PipelineRunner {
       const worktree = this.dependencies.git.createWorktree(preflight, run.id);
       run = this.save({ ...run, branch: worktree.branch, worktreePath: worktree.path, updatedAt: new Date().toISOString() });
 
-      for (const stage of run.stages) {
-        run = await this.runStage(run, stage, artifactStore);
-        if (run.status !== ACTIVE_STAGE_STATUSES[stage.id]) return run;
-      }
-      return this.save(transitionPipelineState(run, 'completed'));
+      return this.runRemaining(run, 0, artifactStore);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       if (run.status === 'preflight' || Object.values(ACTIVE_STAGE_STATUSES).includes(run.status)) {
@@ -67,10 +94,21 @@ export class PipelineRunner {
     }
   }
 
+  private async runRemaining(initial: PipelineRun, startIndex: number, artifactStore: ArtifactStore): Promise<PipelineRun> {
+    let run = initial;
+    for (let index = startIndex; index < run.stages.length; index += 1) {
+      const stage = run.stages[index];
+      if (stage.status === 'succeeded' || stage.status === 'skipped') continue;
+      run = await this.runStage(run, stage, artifactStore);
+      if (run.status !== ACTIVE_STAGE_STATUSES[stage.id]) return run;
+    }
+    return this.save(transitionPipelineState(run, 'completed'));
+  }
+
   private async runStage(run: PipelineRun, sourceStage: PipelineStage, artifactStore: ArtifactStore): Promise<PipelineRun> {
     const activeStatus = ACTIVE_STAGE_STATUSES[sourceStage.id];
     if (stageForRunStatus(activeStatus) !== sourceStage.id) throw new Error(`Stage mapping is invalid for ${sourceStage.id}.`);
-    run = this.save(transitionPipelineState(run, activeStatus));
+    if (run.status !== activeStatus) run = this.save(transitionPipelineState(run, activeStatus));
     const runningStage = transitionStageState(sourceStage, 'running');
     run = this.replaceStage(run, runningStage);
     const adapter = this.dependencies.adapters[sourceStage.provider];
@@ -93,6 +131,11 @@ export class PipelineRunner {
     this.activeProcesses.delete(run.id);
     artifactStore.writeLog(`${sourceStage.id}.stdout.log`, process.stdout);
     artifactStore.writeLog(`${sourceStage.id}.stderr.log`, process.stderr);
+    if (this.pausedRuns.delete(run.id)) {
+      const pausedStage = transitionStageState(runningStage, 'paused');
+      const pausedRun = transitionPipelineState(this.replaceStage(run, pausedStage), 'paused_user');
+      return this.save({ ...pausedRun, failureReason: 'Пауза пользователя: этап можно продолжить явной командой.', updatedAt: new Date().toISOString() });
+    }
     if (this.cancelledRuns.delete(run.id) || process.reason === 'cancelled') {
       const cancelledStage = transitionStageState(runningStage, 'cancelled');
       return this.save(transitionPipelineState(this.replaceStage(run, cancelledStage), 'cancelled'));

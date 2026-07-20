@@ -115,6 +115,24 @@ export default function PipelinePanel({ onClose }: PipelinePanelProps) {
     }
   };
 
+  const retry = async () => {
+    if (!selected) return;
+    try {
+      await window.wmux.pipeline.retry(selected.id);
+      await refresh();
+    } catch (cause: unknown) {
+      setError(cause instanceof Error ? cause.message : 'Не удалось повторить этап.');
+    }
+  };
+
+  const pause = async () => {
+    if (!selected) return;
+    try {
+      await window.wmux.pipeline.pause(selected.id);
+      await refresh();
+    } catch { setError('Не удалось поставить конвейер на паузу.'); }
+  };
+
   return (
     <div className="pipeline-overlay" role="dialog" aria-modal="true" aria-label="Конвейеры">
       <section className="pipeline-panel">
@@ -154,7 +172,7 @@ export default function PipelinePanel({ onClose }: PipelinePanelProps) {
           <main className="pipeline-run" aria-live="polite">
             <div className="pipeline-run__toolbar"><h2>{selected ? selected.task : 'Выберите run'}</h2><span className={`pipeline-run__status pipeline-run__status--${selected?.status ?? 'created'}`}>{selected?.status ?? 'ожидание'}</span></div>
             {selected ? <>
-              <div className="pipeline-run__controls"><button disabled={!['preflight', 'coordinating', 'researching', 'architecting', 'implementing', 'reviewing', 'fixing', 'verifying'].includes(selected.status)} onClick={() => void stop()}>Остановить</button>{selected.status === 'paused_user' ? <span>Run безопасно остановлен после перезапуска. Повтор write-этапа потребует явного подтверждения.</span> : <span>Пауза и повтор этапа появятся после checkpoint восстановления run.</span>}</div>
+              <div className="pipeline-run__controls"><button disabled={!['preflight', 'coordinating', 'researching', 'architecting', 'implementing', 'reviewing', 'fixing', 'verifying'].includes(selected.status)} onClick={() => void pause()}>Пауза</button><button disabled={!['paused_auth', 'paused_quota', 'paused_approval', 'paused_user'].includes(selected.status)} onClick={() => void retry()}>Продолжить</button><button disabled={!['preflight', 'coordinating', 'researching', 'architecting', 'implementing', 'reviewing', 'fixing', 'verifying'].includes(selected.status)} onClick={() => void stop()}>Остановить</button>{selected.status === 'paused_user' ? <span>Пауза завершает текущий CLI-процесс. Продолжение повторит только незавершённый этап по явной команде.</span> : <span>Пауза и повтор доступны без автоматической подмены провайдеров.</span>}</div>
               <ol className="pipeline-timeline">
                 {selected.stages.map((stage) => <li key={stage.id} className={`pipeline-stage pipeline-stage--${stage.status}`}><span className="pipeline-stage__dot" /><div><strong>{STAGE_LABELS[stage.id]}</strong><small>{providerLabel(stage.provider)} · {stage.writeAccess ? 'worktree write' : 'только чтение'}</small>{stage.result && <p>{stage.result.summary}</p>}</div><em>{stage.status}</em></li>)}
               </ol>

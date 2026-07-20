@@ -352,6 +352,8 @@ export const IPC_CHANNELS = {
   PIPELINE_CREATE_DRAFT: 'pipeline:create-draft',
   PIPELINE_START: 'pipeline:start',
   PIPELINE_STOP: 'pipeline:stop',
+  PIPELINE_PAUSE: 'pipeline:pause',
+  PIPELINE_RETRY: 'pipeline:retry',
   PIPELINE_CAPABILITIES: 'pipeline:capabilities',
 } as const;
 
