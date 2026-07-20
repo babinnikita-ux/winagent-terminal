@@ -45,6 +45,9 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
   ipcMain.handle(IPC_CHANNELS.PIPELINE_START, (_event, runId: unknown) => {
     return pipelineService.start(z.string().uuid().parse(runId));
   });
+  ipcMain.handle(IPC_CHANNELS.PIPELINE_STOP, (_event, runId: unknown) => {
+    return pipelineService.stop(z.string().uuid().parse(runId));
+  });
   ipcMain.handle(IPC_CHANNELS.PIPELINE_CAPABILITIES, () => pipelineService.getCapabilities());
 
   // Toggle DevTools for the renderer window

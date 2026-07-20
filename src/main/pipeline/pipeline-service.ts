@@ -82,4 +82,8 @@ export class PipelineService {
       new GeminiAdapter().probe(),
     ]);
   }
+
+  stop(runId: string): boolean {
+    return this.runner.cancel(runId);
+  }
 }

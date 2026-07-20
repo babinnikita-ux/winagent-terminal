@@ -44,7 +44,10 @@ export class ArtifactStore {
     fs.appendFileSync(eventPath, `${JSON.stringify(valid)}\n`, 'utf8');
   }
 
-  writeLog(name: 'stdout.log' | 'stderr.log', content: string): string {
+  writeLog(name: string, content: string): string {
+    if (!/^[a-z0-9-]+\.(stdout|stderr)\.log$/i.test(name)) {
+      throw new Error('Недопустимое имя pipeline-лога.');
+    }
     const target = path.join(this.runDirectory, 'logs', name);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, content, 'utf8');

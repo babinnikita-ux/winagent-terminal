@@ -105,6 +105,16 @@ export default function PipelinePanel({ onClose }: PipelinePanelProps) {
     }
   };
 
+  const stop = async () => {
+    if (!selected) return;
+    try {
+      await window.wmux.pipeline.stop(selected.id);
+      await refresh();
+    } catch {
+      setError('Не удалось остановить конвейер.');
+    }
+  };
+
   return (
     <div className="pipeline-overlay" role="dialog" aria-modal="true" aria-label="Конвейеры">
       <section className="pipeline-panel">
@@ -144,6 +154,7 @@ export default function PipelinePanel({ onClose }: PipelinePanelProps) {
           <main className="pipeline-run" aria-live="polite">
             <div className="pipeline-run__toolbar"><h2>{selected ? selected.task : 'Выберите run'}</h2><span className={`pipeline-run__status pipeline-run__status--${selected?.status ?? 'created'}`}>{selected?.status ?? 'ожидание'}</span></div>
             {selected ? <>
+              <div className="pipeline-run__controls"><button disabled={!['preflight', 'coordinating', 'researching', 'architecting', 'implementing', 'reviewing', 'fixing', 'verifying'].includes(selected.status)} onClick={() => void stop()}>Остановить</button><span>Пауза и повтор этапа появятся после checkpoint восстановления run.</span></div>
               <ol className="pipeline-timeline">
                 {selected.stages.map((stage) => <li key={stage.id} className={`pipeline-stage pipeline-stage--${stage.status}`}><span className="pipeline-stage__dot" /><div><strong>{STAGE_LABELS[stage.id]}</strong><small>{providerLabel(stage.provider)} · {stage.writeAccess ? 'worktree write' : 'только чтение'}</small>{stage.result && <p>{stage.result.summary}</p>}</div><em>{stage.status}</em></li>)}
               </ol>

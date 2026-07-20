@@ -31,7 +31,17 @@ const ACTIVE_STAGE_STATUSES: Record<PipelineStageId, PipelineRun['status']> = {
 
 /** Sequential pipeline executor. Its only writer is the Codex adapter in an isolated worktree. */
 export class PipelineRunner {
+  private readonly activeProcesses = new Map<string, SupervisedProcess>();
+  private readonly cancelledRuns = new Set<string>();
+
   constructor(private readonly dependencies: PipelineRunnerDependencies) {}
+
+  cancel(runId: string): boolean {
+    this.cancelledRuns.add(runId);
+    const process = this.activeProcesses.get(runId);
+    process?.cancel();
+    return Boolean(process);
+  }
 
   async run(initial: PipelineRun): Promise<PipelineRun> {
     let run = initial;
@@ -78,9 +88,15 @@ export class PipelineRunner {
     const request: AgentExecutionRequest = { runId: run.id, stage: runningStage, cwd: run.worktreePath ?? run.repositoryPath, prompt };
     const before = this.dependencies.git.snapshot(request.cwd);
     const invocation = adapter.execute(request);
+    this.activeProcesses.set(run.id, invocation);
     const process = await invocation.result;
-    artifactStore.writeLog('stdout.log', process.stdout);
-    artifactStore.writeLog('stderr.log', process.stderr);
+    this.activeProcesses.delete(run.id);
+    artifactStore.writeLog(`${sourceStage.id}.stdout.log`, process.stdout);
+    artifactStore.writeLog(`${sourceStage.id}.stderr.log`, process.stderr);
+    if (this.cancelledRuns.delete(run.id) || process.reason === 'cancelled') {
+      const cancelledStage = transitionStageState(runningStage, 'cancelled');
+      return this.save(transitionPipelineState(this.replaceStage(run, cancelledStage), 'cancelled'));
+    }
     if (process.reason !== 'completed') return this.failStage(run, runningStage, classifyProcessFailure(process), process.stderr || process.stdout);
 
     let result: StageResult;
