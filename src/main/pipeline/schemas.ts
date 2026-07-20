@@ -89,6 +89,20 @@ export type PipelineAutonomyMode = z.infer<typeof pipelineAutonomyModeSchema>;
 export const pipelineExecutionModeSchema = z.enum(['strict', 'best_effort']);
 export type PipelineExecutionMode = z.infer<typeof pipelineExecutionModeSchema>;
 
+export const pipelineFailureCodeSchema = z.enum([
+  'AUTH_REQUIRED',
+  'SUBSCRIPTION_LIMIT',
+  'RUNTIME_NOT_FOUND',
+  'UNSUPPORTED_VERSION',
+  'PERMISSION_REQUIRED',
+  'TIMEOUT',
+  'MALFORMED_OUTPUT',
+  'PROCESS_CRASH',
+  'GIT_CONFLICT',
+  'TEST_FAILURE',
+]);
+export type PipelineFailureCode = z.infer<typeof pipelineFailureCodeSchema>;
+
 export const pipelineRunSchema = z.object({
   schemaVersion: z.literal(PIPELINE_SCHEMA_VERSION),
   id: z.string().uuid(),
