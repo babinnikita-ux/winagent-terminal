@@ -160,6 +160,17 @@ contextBridge.exposeInMainWorld('wmux', {
       return () => ipcRenderer.removeListener(IPC_CHANNELS.ORCHESTRATION_CLEAR, handler);
     },
   },
+  pipeline: {
+    list: () => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_LIST),
+    get: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_GET, runId),
+    createDraft: (request: {
+      repositoryPath: string;
+      task: string;
+      autonomyMode?: 'safe' | 'balanced' | 'autonomous';
+      executionMode?: 'strict' | 'best_effort';
+      useWorktree?: boolean;
+    }) => ipcRenderer.invoke(IPC_CHANNELS.PIPELINE_CREATE_DRAFT, request),
+  },
   session: {
     save: (session: any) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_SAVE_NAMED, session),
     load: (name: string) => ipcRenderer.invoke(IPC_CHANNELS.SESSION_LOAD_NAMED, name),

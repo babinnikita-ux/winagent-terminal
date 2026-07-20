@@ -346,6 +346,10 @@ export const IPC_CHANNELS = {
   UPDATE_AVAILABLE: 'update:available',
   UPDATE_GET_LATEST: 'update:get-latest',
   UPDATE_OPEN_RELEASE: 'update:open-release',
+  // Multi-AI Pipeline (main-process owned; renderer sees redacted run metadata only)
+  PIPELINE_LIST: 'pipeline:list',
+  PIPELINE_GET: 'pipeline:get',
+  PIPELINE_CREATE_DRAFT: 'pipeline:create-draft',
 } as const;
 
 // ─── Orchestration state (wmux-orchestrator plugin) ────────────────────────

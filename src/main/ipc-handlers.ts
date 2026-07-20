@@ -20,6 +20,9 @@ import { saveNamedSession, loadNamedSession, listNamedSessions, deleteNamedSessi
 import { loadSettings, saveSetting } from './settings-store';
 import { getChangedFiles, getFileDiff } from './diff-provider';
 import { getAgentReadiness } from './proxyapi';
+import { PipelineService } from './pipeline/pipeline-service';
+import { PipelineStore } from './pipeline/pipeline-store';
+import { z } from 'zod';
 
 const ptyManager = new PtyManager();
 const notificationManager = new NotificationManager();
@@ -27,6 +30,19 @@ const cdpBridge = new CDPBridge();
 const agentManager = new AgentManager(ptyManager);
 
 export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstance?: CDPProxy): void {
+  // Pipeline state is deliberately separate from terminal/session persistence.
+  // No process or credential capability crosses this IPC boundary.
+  const pipelineRoot = path.join(app.getPath('userData'), 'pipeline');
+  const pipelineService = new PipelineService(new PipelineStore(pipelineRoot), pipelineRoot);
+
+  ipcMain.handle(IPC_CHANNELS.PIPELINE_LIST, () => pipelineService.listRuns());
+  ipcMain.handle(IPC_CHANNELS.PIPELINE_GET, (_event, runId: unknown) => {
+    return pipelineService.getRun(z.string().uuid().parse(runId));
+  });
+  ipcMain.handle(IPC_CHANNELS.PIPELINE_CREATE_DRAFT, (_event, request: unknown) => {
+    return pipelineService.createDraft(request);
+  });
+
   // Toggle DevTools for the renderer window
   ipcMain.on('toggle-devtools', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
