@@ -42,7 +42,6 @@ export class GeminiAdapter implements AgentAdapter {
       args: [
         '--output-format', 'stream-json',
         '--approval-mode', 'plan',
-        '--sandbox',
       ],
       cwd: request.cwd,
       // A piped prompt runs Gemini headlessly. Keeping task text off argv avoids

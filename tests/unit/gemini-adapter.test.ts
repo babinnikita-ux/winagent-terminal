@@ -15,9 +15,9 @@ const RUN = createPipelineRun({
 describe('Gemini adapter', () => {
   const adapter = new GeminiAdapter();
 
-  it('runs its sole stage in sandboxed plan mode with stdin', () => {
+  it('runs its sole stage in native read-only plan mode with stdin', () => {
     const command = adapter.buildCommand({ runId: RUN.id, stage: RUN.stages[1], cwd: RUN.repositoryPath, prompt: 'Проведи исследование.' });
-    expect(command.args).toEqual(['--output-format', 'stream-json', '--approval-mode', 'plan', '--sandbox']);
+    expect(command.args).toEqual(['--output-format', 'stream-json', '--approval-mode', 'plan']);
     expect(command.stdin).toBe('Проведи исследование.');
   });
 
