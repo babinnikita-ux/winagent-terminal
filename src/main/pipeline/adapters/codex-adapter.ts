@@ -25,6 +25,19 @@ interface CodexJsonEvent {
   summary?: string;
   session_id?: string;
   sessionId?: string;
+  item?: {
+    type?: string;
+    text?: string;
+  };
+}
+
+function completedText(event: CodexJsonEvent): string | undefined {
+  if (typeof event.summary === 'string' && event.summary.trim()) return event.summary;
+  if (typeof event.message === 'string' && event.message.trim()) return event.message;
+  if (event.type === 'item.completed' && event.item?.type === 'agent_message' && typeof event.item.text === 'string' && event.item.text.trim()) {
+    return event.item.text;
+  }
+  return undefined;
 }
 
 /** Official local Codex CLI adapter. It never uses API-key or proxy configuration. */
@@ -95,8 +108,11 @@ export class CodexAdapter implements AgentAdapter {
         throw new Error('MALFORMED_OUTPUT: Codex вернул невалидный JSONL.');
       }
     });
-    const completed = [...events].reverse().find((event) => event.type === 'task_complete' || event.type === 'result');
+    const completed = [...events].reverse().find((event) => (
+      event.type === 'task_complete' || event.type === 'result' || completedText(event) !== undefined
+    ));
     if (!completed) throw new Error('MALFORMED_OUTPUT: в JSONL Codex отсутствует финальный результат.');
+    if (!completed.summary && !completed.message) completed.summary = completedText(completed);
     const now = new Date().toISOString();
     return {
       schemaVersion: 1,

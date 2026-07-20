@@ -31,4 +31,18 @@ describe('Codex adapter', () => {
     expect(adapter.parseResult('{"type":"task_complete","summary":"Brief готов","session_id":"session-1"}\n', request)).toMatchObject({ summary: 'Brief готов', sessionId: 'session-1' });
     expect(() => adapter.parseResult('{bad-json}\n', request)).toThrow('MALFORMED_OUTPUT');
   });
+
+  it('parses the current Codex CLI item.completed agent message', () => {
+    const adapter = new CodexAdapter();
+    const request = { runId: RUN_ID, stage: RUN.stages[0], cwd: RUN.repositoryPath, prompt: 'Составь brief.' };
+    const output = [
+      '{"type":"thread.started","thread_id":"thread-1"}',
+      '{"type":"item.completed","item":{"id":"item-1","type":"agent_message","text":"Brief задачи готов."}}',
+      '{"type":"turn.completed"}',
+    ].join('\n');
+    expect(adapter.parseResult(output, request)).toMatchObject({
+      summary: 'Brief задачи готов.',
+      nextStageContext: 'Brief задачи готов.',
+    });
+  });
 });
