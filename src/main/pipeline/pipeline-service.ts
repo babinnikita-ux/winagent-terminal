@@ -1,7 +1,7 @@
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { PipelineEventLog } from './pipeline-events';
-import { createPipelineRun } from './pipeline-state-machine';
+import { createPipelineRun, transitionPipelineState } from './pipeline-state-machine';
 import { PipelineRun, createPipelineDraftSchema } from './schemas';
 import { PipelineStore } from './pipeline-store';
 import { PipelineRunner } from './pipeline-runner';
@@ -20,6 +20,7 @@ export class PipelineService {
 
   constructor(private readonly store: PipelineStore, eventRootDirectory: string) {
     this.events = new PipelineEventLog(eventRootDirectory);
+    this.recoverInterruptedRuns();
     this.runner = new PipelineRunner({
       store,
       git: new GitWorkspaceService(path.join(eventRootDirectory, 'worktrees')),
@@ -85,5 +86,20 @@ export class PipelineService {
 
   stop(runId: string): boolean {
     return this.runner.cancel(runId);
+  }
+
+  /** A crashed app never replays a writer stage. Recovery is an explicit user decision. */
+  private recoverInterruptedRuns(): void {
+    const activeStates = new Set<PipelineRun['status']>([
+      'preflight', 'coordinating', 'researching', 'architecting', 'implementing', 'reviewing', 'fixing', 'verifying',
+    ]);
+    for (const run of this.store.list()) {
+      if (!activeStates.has(run.status)) continue;
+      const paused = transitionPipelineState(run, 'paused_user');
+      this.store.save({
+        ...paused,
+        failureReason: 'WinAgent был закрыт во время этапа. Повтор этапа требует явного подтверждения.',
+      });
+    }
   }
 }

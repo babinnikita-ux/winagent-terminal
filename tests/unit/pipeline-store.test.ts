@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { PipelineEventLog } from '../../src/main/pipeline/pipeline-events';
 import { PipelineService } from '../../src/main/pipeline/pipeline-service';
 import { PipelineStore } from '../../src/main/pipeline/pipeline-store';
+import { createPipelineRun, transitionPipelineState } from '../../src/main/pipeline/pipeline-state-machine';
 
 const TEST_ROOT = path.join(os.tmpdir(), `winagent-pipeline-${process.pid}`);
 
@@ -38,5 +39,23 @@ describe('pipeline persistence', () => {
     const eventFile = path.join(TEST_ROOT, 'events', `${runId}.jsonl`);
     fs.appendFileSync(eventFile, 'not json\n', 'utf8');
     expect(events.read(runId)).toHaveLength(1);
+  });
+
+  it('pauses an interrupted active run on service restoration without replaying it', () => {
+    const store = new PipelineStore(TEST_ROOT);
+    const active = transitionPipelineState(createPipelineRun({
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      repositoryPath: path.resolve(TEST_ROOT),
+      task: 'Не повторять запись автоматически.',
+      autonomyMode: 'safe',
+      executionMode: 'strict',
+      useWorktree: true,
+      now: '2026-07-20T10:00:00.000Z',
+    }), 'preflight', '2026-07-20T10:01:00.000Z');
+    store.save(active);
+    new PipelineService(store, TEST_ROOT);
+    const restored = store.get(active.id);
+    expect(restored).toMatchObject({ status: 'paused_user', resumeState: 'preflight' });
+    expect(restored?.failureReason).toContain('явного подтверждения');
   });
 });
