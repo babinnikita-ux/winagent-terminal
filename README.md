@@ -27,7 +27,9 @@ See [Architecture](docs/ARCHITECTURE.md), the
 [architecture decision](docs/ARCHITECTURE_DECISION.md), and
 [Russian quick start](README_RU.md), [Windows build guide](docs/BUILD_WINDOWS.md)
 and [troubleshooting](docs/TROUBLESHOOTING.md). See also
-[session restore](docs/SESSION_RESTORE.md) and [contributing](CONTRIBUTING.md).
+[session restore](docs/SESSION_RESTORE.md), [contributing](CONTRIBUTING.md),
+[security](SECURITY.md), [support](SUPPORT.md) and
+[upstream lineage](docs/UPSTREAM_LINEAGE.md).
 
 ## License and attribution
 

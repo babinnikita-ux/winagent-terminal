@@ -1,5 +1,6 @@
 # Auto-publish each wmux release to the Windows Package Manager (winget).
-# Issue #32: lowest-friction distribution win — no code-signing required.
+# wmux issue https://github.com/amirlehmam/wmux/issues/32: lowest-friction
+# distribution win — no code-signing required.
 #
 # ONE-TIME SETUP (owner):
 #   1. Manually submit winget/*.yaml to https://github.com/microsoft/winget-pkgs

@@ -1,4 +1,4 @@
-# Winget distribution (issue #32)
+# Winget distribution (wmux issue https://github.com/amirlehmam/wmux/issues/32)
 
 These manifests publish wmux to the [Windows Package Manager](https://learn.microsoft.com/windows/package-manager/),
 so users can install/upgrade with:
@@ -16,7 +16,8 @@ command alias on PATH that launches the app.
 > ⚠️ Winget improves install **UX**, not **trust**: an unsigned binary still
 > trips SmartScreen on first run. Clearing that needs code-signing (Azure
 > Trusted Signing ≈ $10/mo, or the Microsoft Store which signs for free) — a
-> separate, owner-gated decision tracked in issue #32.
+> separate, owner-gated decision tracked in wmux issue
+> https://github.com/amirlehmam/wmux/issues/32.
 
 ## Files
 

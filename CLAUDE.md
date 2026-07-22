@@ -235,7 +235,7 @@ node -e "
 powershell -NoProfile -Command "Compress-Archive -Path '..\wmux-release-staging\*' -DestinationPath '..\wmux-<VERSION>-win-x64.zip' -CompressionLevel Optimal"
 
 # 9b. Generate latest.yml (REQUIRED — electron-updater 404s on every launch
-# without it; issue #68. The CI workflow does this automatically, but manual
+# without it; wmux issue https://github.com/amirlehmam/wmux/issues/68. The CI workflow does this automatically, but manual
 # releases MUST do it too.)
 node -e "
   const crypto = require('crypto'); const fs = require('fs');
@@ -276,7 +276,7 @@ rm -rf .asar-staging build-out /tmp/asar-verify ../wmux-release-staging
 - [ ] PR-specific markers grep-confirmed inside the packed ASAR (extracted to /tmp)
 - [ ] wmux-orchestrator plugin copied to release staging
 - [ ] rcedit applied (icon + version metadata) — `{ rcedit }` destructured
-- [ ] `latest.yml` generated (sha512 + size of the final zip) and uploaded as a release asset — electron-updater 404s without it (issue #68)
+- [ ] `latest.yml` generated (sha512 + size of the final zip) and uploaded as a release asset — electron-updater 404s without it (wmux issue https://github.com/amirlehmam/wmux/issues/68)
 - [ ] Zip created and uploaded to GitHub release
 - [ ] Mark of the Web: remind user to right-click > Unblock after download
 
@@ -350,9 +350,9 @@ wmux new-window | list-windows | focus-window <id>
 # Workspaces
 wmux new-workspace [--title T] [--shell S] [--cwd D]   # --shell accepts args: --shell "ssh user@host"
 wmux close-workspace | select-workspace | rename-workspace | list-workspaces
-wmux ssh [ssh options] <user@host> [--title T]         # remote terminal in a new workspace (issue #78)
+wmux ssh [ssh options] <user@host> [--title T]         # remote terminal in a new workspace (wmux issue https://github.com/amirlehmam/wmux/issues/78)
 
-# Remote wmux management (issue #78): drive another machine's wmux over an SSH tunnel
+# Remote wmux management (wmux issue https://github.com/amirlehmam/wmux/issues/78): drive another machine's wmux over an SSH tunnel
 wmux bridge [--port P] [--host H]     # on the remote: expose its pipe on TCP (default 127.0.0.1:9787)
 wmux token                            # on the remote: print its auth token
 wmux --remote host[:port] --token T <any command>   # on the client (through `ssh -L port:127.0.0.1:port`)

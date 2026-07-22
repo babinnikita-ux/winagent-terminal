@@ -2,7 +2,23 @@
 
 All notable changes are documented here.
 
-## [0.4.0] - 2026-07-18
+## [0.27.1] - 2026-07-18
+
+This is the current source version in `package.json`. No public Git tag or
+GitHub Release had been published when this changelog was normalized.
+
+### Changed
+
+- Consolidated the WinAgent Terminal milestones recorded below into the current
+  source version without rewriting upstream history.
+
+## Historical milestone notes (unreleased)
+
+The following sections record implementation milestones from 2026-07-18. They
+are not published WinAgent Terminal releases and must not be inferred to be
+GitHub tags or release artifacts.
+
+### Milestone 4
 
 ### Changed
 
@@ -16,7 +32,7 @@ All notable changes are documented here.
   it uses the packaged Electron runtime when Node.js is not installed.
 - Installer packaging now includes all CLI runtime modules required by `wagent`.
 
-## [0.3.0] - 2026-07-18
+### Milestone 3
 
 ### Added
 
@@ -28,7 +44,7 @@ All notable changes are documented here.
 - Guest browser pages are sandboxed before attachment and cannot receive a
   preload API, Node integration, popups, plugins or unsafe navigation schemes.
 
-## [0.2.0] - 2026-07-18
+### Milestone 2
 
 ### Added
 
@@ -37,7 +53,7 @@ All notable changes are documented here.
 - Isolated, credential-free Codex provider configuration and ProxyAPI setup documentation.
 - Regression tests for provider mappings, generated config secrecy and diagnostic redaction.
 
-## [0.1.0] - 2026-07-18
+### Milestone 1
 
 ### Added
 
