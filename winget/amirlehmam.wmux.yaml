@@ -1,4 +1,4 @@
-# Winget version manifest (issue #32).
+# Winget version manifest (wmux issue https://github.com/amirlehmam/wmux/issues/32).
 # Submitted to microsoft/winget-pkgs under
 #   manifests/a/amirlehmam/wmux/<version>/
 # After the first manual submission, .github/workflows/winget.yml keeps it

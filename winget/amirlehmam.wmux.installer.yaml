@@ -1,4 +1,4 @@
-# Winget installer manifest (issue #32).
+# Winget installer manifest (wmux issue https://github.com/amirlehmam/wmux/issues/32).
 # wmux ships as a portable zip (no code-signing → SmartScreen flags installers
 # harder than zip extractions), so winget treats it as InstallerType: zip with a
 # nested portable exe. This adds a `wmux` command alias to PATH and lets users

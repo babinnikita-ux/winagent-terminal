@@ -1,4 +1,4 @@
-# Winget default-locale manifest (issue #32).
+# Winget default-locale manifest (wmux issue https://github.com/amirlehmam/wmux/issues/32).
 PackageIdentifier: amirlehmam.wmux
 PackageVersion: 0.8.6
 PackageLocale: en-US

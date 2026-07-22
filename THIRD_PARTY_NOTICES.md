@@ -11,6 +11,10 @@ architecture/security documentation, source attribution, hardened browser and
 IPC boundaries, and WinAgent release identity. Upstream branding, logo and
 release identity are not used as this product's branding.
 
+New WinAgent Terminal changes are identified by the repository's Git history;
+they do not replace or erase copyright and authorship notices from wmux. This
+file is an attribution notice, not legal advice.
+
 ## Dependency notices
 
 This project uses Electron, React, xterm.js, node-pty, Zustand and other npm
