@@ -6,6 +6,7 @@ import '../../styles/terminal.css';
 import { AgentPreset } from '../../../shared/types';
 import { copyTerminalText } from '../../utils/copy-text';
 import { useT } from '../../i18n';
+import { appendAgentOutput, sanitizeAgentOutput } from './agent-chat-output';
 
 interface TerminalPaneProps {
   surfaceId?: string;
@@ -38,7 +39,19 @@ export default function TerminalPane({
   onFindBarClose,
   copyModeActive = false,
 }: TerminalPaneProps) {
-  const { terminalRef, xtermRef, searchAddonRef } = useTerminal({ surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands, agentPreset, resumeAgentSession });
+  const [agentDraft, setAgentDraft] = useState('');
+  const [userMessages, setUserMessages] = useState<Array<{ id: number; content: string }>>([]);
+  const [assistantOutput, setAssistantOutput] = useState('');
+  const agentRawOutputRef = useRef('');
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const handleAgentOutput = useCallback((chunk: string) => {
+    agentRawOutputRef.current = appendAgentOutput(agentRawOutputRef.current, chunk);
+    setAssistantOutput(sanitizeAgentOutput(agentRawOutputRef.current));
+  }, []);
+  const { terminalRef, xtermRef, searchAddonRef, sendText } = useTerminal({
+    surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands,
+    agentPreset, resumeAgentSession, onOutput: agentPreset ? handleAgentOutput : undefined,
+  });
 
   const [_lastQuery, setLastQuery] = useState('');
   const [copyMessage, setCopyMessage] = useState('');
@@ -108,6 +121,10 @@ export default function TerminalPane({
     if (copyMessageTimerRef.current) clearTimeout(copyMessageTimerRef.current);
   }, []);
 
+  useEffect(() => {
+    if (agentPreset) messagesEndRef.current?.scrollIntoView({ block: 'end' });
+  }, [agentPreset, assistantOutput, userMessages]);
+
   const handleCopy = useCallback(async () => {
     const terminal = xtermRef.current;
     if (!terminal) return;
@@ -136,8 +153,75 @@ export default function TerminalPane({
       ? t('chat.title.codex')
       : t('chat.title.terminal');
 
+  const submitAgentMessage = useCallback(() => {
+    const content = agentDraft.trim();
+    if (!content) return;
+    setUserMessages((messages) => [...messages, { id: Date.now(), content }]);
+    agentRawOutputRef.current = '';
+    setAssistantOutput('');
+    sendText(`${content}\r`);
+    setAgentDraft('');
+  }, [agentDraft, sendText]);
+
   return (
     <div className={`terminal-pane ${focused ? 'terminal-pane--focused' : ''}`}>
+      {agentPreset && (
+        <section className="agent-chat" aria-label={`Чат ${chatTitle}`}>
+          <header className="agent-chat__header">
+            <div>
+              <span className="agent-chat__avatar">{agentPreset === 'claude-code' ? 'C' : 'X'}</span>
+              <span><strong>{chatTitle}</strong><small>Локальная CLI-сессия</small></span>
+            </div>
+            <span className="agent-chat__connected"><i /> Подключено</span>
+          </header>
+          <div className="agent-chat__messages">
+            {userMessages.length === 0 && !assistantOutput && (
+              <div className="agent-chat__welcome">
+                <span className="agent-chat__avatar">{agentPreset === 'claude-code' ? 'C' : 'X'}</span>
+                <div>
+                  <strong>{chatTitle} готов к работе</strong>
+                  <p>Напишите задачу обычным сообщением. Команда будет отправлена в реальную CLI-сессию этой вкладки.</p>
+                </div>
+              </div>
+            )}
+            {userMessages.map((message) => (
+              <article className="agent-chat__message agent-chat__message--user" key={message.id}>
+                <span>Вы</span>
+                <p>{message.content}</p>
+              </article>
+            ))}
+            {assistantOutput && (
+              <article className="agent-chat__message agent-chat__message--assistant">
+                <span>{chatTitle}</span>
+                <pre>{assistantOutput}</pre>
+              </article>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <footer className="agent-chat__composer">
+            <textarea
+              value={agentDraft}
+              onChange={(event) => setAgentDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  submitAgentMessage();
+                }
+              }}
+              placeholder={`Сообщение для ${chatTitle}…`}
+              aria-label={`Сообщение для ${chatTitle}`}
+              rows={3}
+            />
+            <div>
+              <span>Enter — отправить · Shift+Enter — новая строка</span>
+              <button type="button" onClick={submitAgentMessage} disabled={!agentDraft.trim()}>
+                Отправить
+              </button>
+            </div>
+          </footer>
+        </section>
+      )}
+      <div className={agentPreset ? 'terminal-pane__backend' : undefined}>
       <div className="terminal-pane__chatbar" aria-label={t('chat.controls.label')}>
         <div className="terminal-pane__chat-context">
           <span className="terminal-pane__chat-status" aria-hidden="true" />
@@ -174,6 +258,7 @@ export default function TerminalPane({
         />
       )}
       <CopyMode active={copyModeActive} />
+      </div>
     </div>
   );
 }
