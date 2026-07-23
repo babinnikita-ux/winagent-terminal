@@ -28,3 +28,12 @@ npm.cmd run dev
 Настройка ProxyAPI: [docs/PROXYAPI_SETUP.md](docs/PROXYAPI_SETUP.md).
 Сборка Windows: [docs/BUILD_WINDOWS.md](docs/BUILD_WINDOWS.md).
 Устранение неполадок: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+## Обновлённый интерфейс
+
+Русский язык используется по умолчанию и сохраняется между запусками. Оболочка
+поддерживает тёплые светлую и тёмную темы, три варианта плотности и режим
+фокусировки. В боковой панели отображаются лимиты Claude, Gemini и Codex только
+из подтверждённых источников; при отсутствии надёжных данных показывается
+честный статус недоступности. Подробнее: [лимиты провайдеров](docs/PROVIDER_USAGE.md),
+[новый UI](docs/NEW_UI.md) и [безопасность интеграций](docs/SECURITY_PROVIDER_INTEGRATIONS.md).

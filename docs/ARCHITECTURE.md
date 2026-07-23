@@ -39,3 +39,12 @@ The public `wagent` CLI sends versioned JSON-RPC-like requests through
 `\\.\pipe\winagent-terminal`. Privileged commands need the per-instance token;
 they must not be trusted merely because they originate in a renderer, shell or
 local process.
+
+## Provider usage boundary
+
+`ProviderUsageService` lives in the Electron main process. Provider adapters
+accept only structured, sanitized payloads and normalize percentages to
+`0..100`; no tokens, cookies, API keys, config contents or raw CLI stdout cross
+the preload boundary. Renderer access is limited to snapshot, refresh and
+unsubscribe-safe update methods. Missing stable machine-readable provider data
+is represented as unavailable instead of being estimated.

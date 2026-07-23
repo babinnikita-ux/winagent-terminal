@@ -2,6 +2,23 @@
 
 All notable changes are documented here.
 
+## Unreleased
+
+### Added
+
+- Secure main-process provider usage service, constrained IPC and Claude,
+  Codex and Gemini sanitized payload parsers.
+- Warm light/dark application chrome, interface density control and focus mode.
+- Russian interpolation, plural helpers and translation-parity regression tests.
+- Bounded attention, layout, prompt expansion, settings migration and
+  diagnostic redaction primitives with unit coverage.
+
+### Changed
+
+- Russian is the default interface language and remains valid when restored
+  from persisted settings.
+- The default sidebar is wider and new workspaces use Russian names.
+
 ## [0.4.0] - 2026-07-18
 
 ### Changed
