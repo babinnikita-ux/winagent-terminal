@@ -3,7 +3,9 @@ import {
   translate,
   detectDefaultLanguage,
   getMissingTranslationKeys,
+  interpolate,
   LANGUAGES,
+  pluralizeRu,
   SUPPORTED_LANGUAGES,
 } from '../../src/renderer/i18n';
 
@@ -34,6 +36,15 @@ describe('i18n: translate (issue #56)', () => {
 
   it('keeps the primary Russian dictionary in parity with English', () => {
     expect(getMissingTranslationKeys('ru')).toEqual([]);
+  });
+
+  it('interpolates named parameters without evaluating templates', () => {
+    expect(interpolate('Открыто: {{count}}', { count: 3 })).toBe('Открыто: 3');
+  });
+
+  it('uses Russian plural forms', () => {
+    expect([1, 2, 5].map((count) => pluralizeRu(count, ['сессия', 'сессии', 'сессий'])))
+      .toEqual(['1 сессия', '2 сессии', '5 сессий']);
   });
 });
 
