@@ -139,8 +139,9 @@ export function resolveSpawnCwd(cwd: string | undefined): string | undefined {
 
   const fallback = process.env.USERPROFILE || 'C:\\';
 
-  // POSIX/WSL cwd: not a valid Win32 working dir at all (issue #60).
-  if (isPosixPath(cwd)) return fallback;
+  // POSIX/WSL cwd is not valid for Windows CreateProcess. Keep real POSIX
+  // directories for the Linux test/development host.
+  if (process.platform === 'win32' && isPosixPath(cwd)) return fallback;
 
   // Win32 cwd that no longer exists (deleted git worktree) or does not exist
   // yet (spawn ordered before `git worktree add` finished). Also rejects a path
