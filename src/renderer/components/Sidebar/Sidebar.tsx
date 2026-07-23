@@ -6,6 +6,7 @@ import WorkspaceContextMenu from './WorkspaceContextMenu';
 import SessionMenu from './SessionMenu';
 import OrchestrationPanel from './OrchestrationPanel';
 import ErrorBoundary from '../ErrorBoundary';
+import ProviderUsagePanel from './ProviderUsagePanel';
 import { useStore } from '../../store';
 import '../../styles/sidebar.css';
 
@@ -268,6 +269,7 @@ export default function Sidebar({
       </div>
 
       <ErrorBoundary label="orchestration" silent>
+        <ProviderUsagePanel />
         <OrchestrationPanel />
       </ErrorBoundary>
 

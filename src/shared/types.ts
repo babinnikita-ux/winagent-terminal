@@ -346,6 +346,9 @@ export const IPC_CHANNELS = {
   UPDATE_AVAILABLE: 'update:available',
   UPDATE_GET_LATEST: 'update:get-latest',
   UPDATE_OPEN_RELEASE: 'update:open-release',
+  PROVIDER_USAGE_GET: 'provider-usage:get',
+  PROVIDER_USAGE_REFRESH: 'provider-usage:refresh',
+  PROVIDER_USAGE_UPDATE: 'provider-usage:update',
 } as const;
 
 // ─── Orchestration state (wmux-orchestrator plugin) ────────────────────────
@@ -400,3 +403,8 @@ export interface OrchestrationState {
   // Client-side only — populated by the watcher so the renderer knows where to dismiss from.
   _orchDir?: string;
 }
+
+export type ProviderId = 'claude' | 'gemini' | 'codex';
+export type ProviderUsageStatus = 'fresh' | 'stale' | 'unavailable' | 'auth-required' | 'not-installed' | 'error';
+export interface UsageWindow { id: string; label: string; usedPercent: number | null; remainingPercent: number | null; resetsAt: number | null; }
+export interface ProviderUsage { provider: ProviderId; status: ProviderUsageStatus; windows: UsageWindow[]; updatedAt: number | null; source: 'statusline' | 'app-server' | 'cli' | 'manual' | null; errorCode?: string; }
