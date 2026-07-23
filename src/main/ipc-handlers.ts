@@ -374,6 +374,19 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
     }
     return { path: result.filePaths[0] };
   });
+
+  ipcMain.handle(IPC_CHANNELS.CHAT_PICK_FILES, async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender) ?? undefined;
+    const result = await dialog.showOpenDialog(win as BrowserWindow, {
+      title: 'Добавить файлы в чат',
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Все файлы', extensions: ['*'] }],
+    });
+    return {
+      canceled: result.canceled,
+      paths: result.canceled ? [] : result.filePaths,
+    };
+  });
 }
 
 export function setupAgentPtyForwarding(surfaceId: string, window: BrowserWindow): void {

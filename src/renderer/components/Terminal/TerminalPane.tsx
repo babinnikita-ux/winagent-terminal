@@ -6,7 +6,7 @@ import '../../styles/terminal.css';
 import { AgentPreset } from '../../../shared/types';
 import { copyTerminalText } from '../../utils/copy-text';
 import { useT } from '../../i18n';
-import { appendAgentOutput, sanitizeAgentOutput } from './agent-chat-output';
+import { appendAgentOutput, buildAgentConnectCommand, sanitizeAgentOutput } from './agent-chat-output';
 
 interface TerminalPaneProps {
   surfaceId?: string;
@@ -42,11 +42,18 @@ export default function TerminalPane({
   const [agentDraft, setAgentDraft] = useState('');
   const [userMessages, setUserMessages] = useState<Array<{ id: number; content: string }>>([]);
   const [assistantOutput, setAssistantOutput] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'missing' | 'connecting' | 'connected'>('checking');
+  const [model, setModel] = useState('default');
+  const [effort, setEffort] = useState('default');
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const [providerUsage, setProviderUsage] = useState<any>(null);
   const agentRawOutputRef = useRef('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const handleAgentOutput = useCallback((chunk: string) => {
     agentRawOutputRef.current = appendAgentOutput(agentRawOutputRef.current, chunk);
-    setAssistantOutput(sanitizeAgentOutput(agentRawOutputRef.current));
+    const output = sanitizeAgentOutput(agentRawOutputRef.current);
+    setAssistantOutput(output);
+    if (output) setConnectionStatus('connected');
   }, []);
   const { terminalRef, xtermRef, searchAddonRef, sendText } = useTerminal({
     surfaceId, shell, cwd, visible, focused, colorScheme, startupCommands,
@@ -57,6 +64,32 @@ export default function TerminalPane({
   const [copyMessage, setCopyMessage] = useState('');
   const copyMessageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = useT();
+
+  useEffect(() => {
+    if (!agentPreset) return;
+    let disposed = false;
+    const provider = agentPreset === 'claude-code' ? 'claude' : 'codex';
+    void window.wmux?.agent?.readiness?.().then((readiness: any) => {
+      if (disposed) return;
+      const available = agentPreset === 'claude-code'
+        ? readiness?.claudeCodeAvailable
+        : readiness?.codexAvailable;
+      setConnectionStatus((current) =>
+        current === 'connected' ? current : available ? 'connecting' : 'missing');
+    }).catch(() => {
+      if (!disposed) setConnectionStatus('missing');
+    });
+    void window.wmux?.providerUsage?.get?.().then((items: any[]) => {
+      if (!disposed) setProviderUsage(items?.find((item) => item.provider === provider) ?? null);
+    });
+    const unsubscribe = window.wmux?.providerUsage?.onUpdate?.((items: any[]) => {
+      setProviderUsage(items?.find((item) => item.provider === provider) ?? null);
+    });
+    return () => {
+      disposed = true;
+      unsubscribe?.();
+    };
+  }, [agentPreset]);
 
   // Latest values mirrored into refs so the global F3 / Shift+F3 listener (issue
   // #64) can read them without re-subscribing on every keystroke or focus change.
@@ -153,15 +186,56 @@ export default function TerminalPane({
       ? t('chat.title.codex')
       : t('chat.title.terminal');
 
+  const connectAgent = useCallback(async () => {
+    if (!agentPreset) return;
+    setConnectionStatus('checking');
+    const readiness = await window.wmux?.agent?.readiness?.().catch(() => null);
+    const available = agentPreset === 'claude-code'
+      ? readiness?.claudeCodeAvailable
+      : readiness?.codexAvailable;
+    if (!available) {
+      setConnectionStatus('missing');
+      return;
+    }
+    agentRawOutputRef.current = '';
+    setAssistantOutput('');
+    setConnectionStatus('connecting');
+    sendText('\x03');
+    window.setTimeout(() => {
+      sendText(`${buildAgentConnectCommand(agentPreset, model, effort)}\r`);
+    }, 180);
+    const provider = agentPreset === 'claude-code' ? 'claude' : 'codex';
+    void window.wmux?.providerUsage?.refresh?.(provider);
+  }, [agentPreset, effort, model, sendText]);
+
+  const pickAttachments = useCallback(async () => {
+    const result = await window.wmux?.chat?.pickFiles?.();
+    if (!result?.canceled && Array.isArray(result?.paths)) {
+      setAttachments((current) => [...new Set([...current, ...result.paths])]);
+    }
+  }, []);
+
   const submitAgentMessage = useCallback(() => {
     const content = agentDraft.trim();
-    if (!content) return;
+    if (!content || connectionStatus !== 'connected') return;
     setUserMessages((messages) => [...messages, { id: Date.now(), content }]);
     agentRawOutputRef.current = '';
     setAssistantOutput('');
-    sendText(`${content}\r`);
+    const attachmentContext = attachments.length
+      ? `\n\nПрикреплённые файлы:\n${attachments.map((file) => `- "${file}"`).join('\n')}`
+      : '';
+    sendText(`${content}${attachmentContext}\r`);
     setAgentDraft('');
-  }, [agentDraft, sendText]);
+    setAttachments([]);
+  }, [agentDraft, attachments, connectionStatus, sendText]);
+
+  const remainingLimit = providerUsage?.windows?.reduce(
+    (lowest: number | null, item: any) =>
+      typeof item.remainingPercent === 'number'
+        ? (lowest === null ? item.remainingPercent : Math.min(lowest, item.remainingPercent))
+        : lowest,
+    null,
+  );
 
   return (
     <div className={`terminal-pane ${focused ? 'terminal-pane--focused' : ''}`}>
@@ -172,15 +246,44 @@ export default function TerminalPane({
               <span className="agent-chat__avatar">{agentPreset === 'claude-code' ? 'C' : 'X'}</span>
               <span><strong>{chatTitle}</strong><small>Локальная CLI-сессия</small></span>
             </div>
-            <span className="agent-chat__connected"><i /> Подключено</span>
+            <div className="agent-chat__header-actions">
+              <span className="agent-chat__limit">
+                Лимит: {typeof remainingLimit === 'number' ? `${Math.round(remainingLimit)}%` : 'нет данных'}
+              </span>
+              <span className={`agent-chat__connection agent-chat__connection--${connectionStatus}`}>
+                <i />
+                {connectionStatus === 'connected'
+                  ? 'Подключено'
+                  : connectionStatus === 'connecting'
+                    ? 'Подключение…'
+                    : connectionStatus === 'missing'
+                      ? 'CLI не найден'
+                      : 'Проверка…'}
+              </span>
+              <button type="button" className="agent-chat__connect" onClick={() => void connectAgent()}>
+                {connectionStatus === 'connected' ? 'Переподключить' : 'Подключить'}
+              </button>
+            </div>
           </header>
           <div className="agent-chat__messages">
             {userMessages.length === 0 && !assistantOutput && (
               <div className="agent-chat__welcome">
                 <span className="agent-chat__avatar">{agentPreset === 'claude-code' ? 'C' : 'X'}</span>
                 <div>
-                  <strong>{chatTitle} готов к работе</strong>
-                  <p>Напишите задачу обычным сообщением. Команда будет отправлена в реальную CLI-сессию этой вкладки.</p>
+                  <strong>
+                    {connectionStatus === 'connected'
+                      ? `${chatTitle} готов к работе`
+                      : connectionStatus === 'missing'
+                        ? `${chatTitle}: CLI не найден`
+                        : `Подключение к ${chatTitle}`}
+                  </strong>
+                  <p>
+                    {connectionStatus === 'connected'
+                      ? 'Напишите задачу обычным сообщением. Она будет отправлена в реальную CLI-сессию этой вкладки.'
+                      : connectionStatus === 'missing'
+                        ? 'Установите CLI провайдера или добавьте его в PATH, затем нажмите «Подключить».'
+                        : 'Ожидаем подтверждения от локальной CLI-сессии. Статус изменится только после реального ответа.'}
+                  </p>
                 </div>
               </div>
             )}
@@ -199,6 +302,53 @@ export default function TerminalPane({
             <div ref={messagesEndRef} />
           </div>
           <footer className="agent-chat__composer">
+            <div className="agent-chat__tools">
+              <button type="button" onClick={() => void pickAttachments()}>＋ Файл</button>
+              <label>
+                Модель
+                <select value={model} onChange={(event) => setModel(event.target.value)}>
+                  <option value="default">По умолчанию</option>
+                  {agentPreset === 'claude-code' ? (
+                    <>
+                      <option value="sonnet">Sonnet</option>
+                      <option value="opus">Opus</option>
+                      <option value="haiku">Haiku</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="gpt-5.4">GPT-5.4</option>
+                      <option value="gpt-5.3-codex">GPT-5.3 Codex</option>
+                      <option value="gpt-5.3-codex-spark">GPT-5.3 Codex Spark</option>
+                    </>
+                  )}
+                </select>
+              </label>
+              <label>
+                Effort
+                <select value={effort} onChange={(event) => setEffort(event.target.value)}>
+                  <option value="default">По умолчанию</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="xhigh">XHigh</option>
+                  <option value="max">Max</option>
+                </select>
+              </label>
+            </div>
+            {attachments.length > 0 && (
+              <div className="agent-chat__attachments">
+                {attachments.map((file) => (
+                  <button
+                    type="button"
+                    key={file}
+                    title={file}
+                    onClick={() => setAttachments((current) => current.filter((item) => item !== file))}
+                  >
+                    {file.split(/[\\/]/).pop()} ×
+                  </button>
+                ))}
+              </div>
+            )}
             <textarea
               value={agentDraft}
               onChange={(event) => setAgentDraft(event.target.value)}
@@ -210,11 +360,16 @@ export default function TerminalPane({
               }}
               placeholder={`Сообщение для ${chatTitle}…`}
               aria-label={`Сообщение для ${chatTitle}`}
+              disabled={connectionStatus !== 'connected'}
               rows={3}
             />
             <div>
               <span>Enter — отправить · Shift+Enter — новая строка</span>
-              <button type="button" onClick={submitAgentMessage} disabled={!agentDraft.trim()}>
+              <button
+                type="button"
+                onClick={submitAgentMessage}
+                disabled={!agentDraft.trim() || connectionStatus !== 'connected'}
+              >
                 Отправить
               </button>
             </div>

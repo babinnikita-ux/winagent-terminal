@@ -14,6 +14,15 @@ describe('provider usage safety', () => {
   it('parses sanitized Codex app-server windows', () => {
     expect(parseCodexUsage({ rateLimits: [{ id: 'weekly', usedPercent: 25, resetsAt: 42 }] }))
       .toEqual([expect.objectContaining({ id: 'weekly', remainingPercent: 75, resetsAt: 42 })]);
+    expect(parseCodexUsage({
+      rateLimits: {
+        primary: { usedPercent: 20, windowDurationMins: 300, resetsAt: 42 },
+        secondary: { usedPercent: 35, windowDurationMins: 10_080, resetsAt: 84 },
+      },
+    })).toEqual([
+      expect.objectContaining({ id: 'primary', label: '5 часов', remainingPercent: 80 }),
+      expect.objectContaining({ id: 'secondary', label: 'Неделя', remainingPercent: 65 }),
+    ]);
     expect(parseCodexUsage({ rateLimits: 'secret stdout' })).toBeNull();
   });
   it('parses sanitized Gemini quota windows', () => {

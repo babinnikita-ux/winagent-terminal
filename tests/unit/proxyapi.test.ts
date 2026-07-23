@@ -35,7 +35,7 @@ describe('ProxyAPI launch profiles', () => {
   });
 
   it('uses each CLI\'s native interactive resume syntax', () => {
-    expect(getAgentStartupCommand('claude-code', true)).toBe('claude --resume');
-    expect(getAgentStartupCommand('codex', true)).toBe('codex resume');
+    expect(getAgentStartupCommand('claude-code', true, 'linux')).toBe('claude --resume');
+    expect(getAgentStartupCommand('codex', true, 'win32')).toBe('codex.cmd resume');
   });
 });

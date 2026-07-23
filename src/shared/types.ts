@@ -298,6 +298,7 @@ export const IPC_CHANNELS = {
   SYSTEM_PICK_FOLDER: 'system:pickFolder',
   SYSTEM_GET_SHOULD_USE_DARK_COLORS: 'system:getShouldUseDarkColors',
   SYSTEM_NATIVE_THEME_UPDATED: 'system:nativeThemeUpdated',
+  CHAT_PICK_FILES: 'chat:pickFiles',
   // Metadata events (main → renderer)
   METADATA_UPDATE: 'metadata:update',
   // Agent

@@ -1,4 +1,6 @@
 import { spawn } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 import { ProviderId, ProviderUsage, UsageWindow } from '../shared/types';
 
 const STALE_MS = 5 * 60_000;
@@ -25,6 +27,23 @@ export function parseClaudeStatusLine(payload: unknown): UsageWindow[] | null {
 export function parseCodexUsage(payload: unknown): UsageWindow[] | null {
   if (!payload || typeof payload !== 'object') return null;
   const rateLimits = (payload as { rateLimits?: unknown }).rateLimits;
+  if (rateLimits && typeof rateLimits === 'object' && !Array.isArray(rateLimits)) {
+    const snapshot = rateLimits as {
+      primary?: unknown;
+      secondary?: unknown;
+    };
+    const windows = ([
+      ['primary', snapshot.primary],
+      ['secondary', snapshot.secondary],
+    ] as Array<[string, unknown]>).flatMap(([id, raw]): UsageWindow[] => {
+      if (!raw || typeof raw !== 'object') return [];
+      const value = raw as { usedPercent?: unknown; resetsAt?: unknown; windowDurationMins?: unknown };
+      const duration = typeof value.windowDurationMins === 'number' ? value.windowDurationMins : null;
+      const label = duration === 300 ? '5 часов' : duration === 10_080 ? 'Неделя' : id;
+      return [usageWindow(String(id), label, value.usedPercent, value.resetsAt)];
+    });
+    return windows.some((window) => window.usedPercent !== null) ? windows : null;
+  }
   if (!Array.isArray(rateLimits)) return null;
   const windows = rateLimits.flatMap((raw): UsageWindow[] => {
     if (!raw || typeof raw !== 'object') return [];
@@ -96,12 +115,91 @@ export class ProviderUsageService {
     await Promise.all(providers.map(async (item) => {
       if (item === 'claude' && this.cache.get(item)?.source === 'statusline') return;
       const installed = await commandExists(cliNames[item]);
-      this.cache.set(item, installed ? { provider: item, status: 'unavailable', windows: [], updatedAt: null, source: 'cli', errorCode: 'usage-not-supported' } : { provider: item, status: 'not-installed', windows: [], updatedAt: null, source: null });
+      if (!installed) {
+        this.cache.set(item, { provider: item, status: 'not-installed', windows: [], updatedAt: null, source: null });
+        return;
+      }
+      if (item === 'codex') {
+        const windows = await readCodexRateLimits();
+        this.cache.set(item, windows
+          ? { provider: item, status: 'fresh', windows, updatedAt: Date.now(), source: 'app-server' }
+          : { provider: item, status: 'unavailable', windows: [], updatedAt: null, source: 'app-server', errorCode: 'rate-limits-unavailable' });
+        return;
+      }
+      this.cache.set(item, { provider: item, status: 'unavailable', windows: [], updatedAt: null, source: 'cli', errorCode: 'usage-not-supported' });
     }));
     this.emit(); return this.getAll();
   }
   private emit(): void { const values = this.getAll(); this.listeners.forEach((listener) => listener(values)); }
 }
 function commandExists(command: string): Promise<boolean> {
-  return new Promise((resolve) => { const child = spawn(command, ['--version'], { shell: false, windowsHide: true, stdio: 'ignore' }); const timeout = setTimeout(() => { child.kill(); resolve(false); }, 3000); child.once('error', () => { clearTimeout(timeout); resolve(false); }); child.once('exit', (code) => { clearTimeout(timeout); resolve(code === 0); }); });
+  return new Promise((resolve) => {
+    const executable = process.platform === 'win32' ? 'where.exe' : 'which';
+    const args = [process.platform === 'win32' ? `${command}.*` : command];
+    const child = spawn(executable, args, { shell: false, windowsHide: true, stdio: 'ignore' });
+    const timeout = setTimeout(() => { child.kill(); resolve(false); }, 3000);
+    child.once('error', () => { clearTimeout(timeout); resolve(false); });
+    child.once('exit', (code) => { clearTimeout(timeout); resolve(code === 0); });
+  });
+}
+
+function readCodexRateLimits(): Promise<UsageWindow[] | null> {
+  return new Promise((resolve) => {
+    const managedCodex = findManagedCodexExecutable();
+    const child = spawn(managedCodex ?? 'codex', ['app-server'], {
+      windowsHide: true,
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    let settled = false;
+    let buffer = '';
+    const finish = (windows: UsageWindow[] | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      child.kill();
+      resolve(windows);
+    };
+    const timeout = setTimeout(() => finish(null), 6000);
+    child.once('error', () => finish(null));
+    child.stdout.on('data', (chunk) => {
+      buffer += chunk.toString('utf8');
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        try {
+          const message = JSON.parse(line);
+          if (message?.id === 1) {
+            child.stdin.write(`${JSON.stringify({ method: 'initialized', params: {} })}\n`);
+            child.stdin.write(`${JSON.stringify({ method: 'account/rateLimits/read', id: 7 })}\n`);
+          } else if (message?.id === 7) {
+            finish(parseCodexUsage(message.result));
+          }
+        } catch { /* app-server may emit non-protocol diagnostics */ }
+      }
+    });
+    child.stdin.write(`${JSON.stringify({
+      method: 'initialize',
+      id: 1,
+      params: {
+        clientInfo: { name: 'winagent-terminal', title: 'WinAgent Terminal', version: '0.27.1' },
+        capabilities: {},
+      },
+    })}\n`);
+  });
+}
+
+function findManagedCodexExecutable(): string | null {
+  if (process.platform !== 'win32' || !process.env.LOCALAPPDATA) return null;
+  const root = path.join(process.env.LOCALAPPDATA, 'OpenAI', 'Codex', 'bin');
+  try {
+    const candidates = fs.readdirSync(root, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => path.join(root, entry.name, 'codex.exe'))
+      .filter((candidate) => fs.existsSync(candidate))
+      .map((candidate) => ({ candidate, modified: fs.statSync(candidate).mtimeMs }))
+      .sort((left, right) => right.modified - left.modified);
+    return candidates[0]?.candidate ?? null;
+  } catch {
+    return null;
+  }
 }

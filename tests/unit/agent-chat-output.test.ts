@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { appendAgentOutput, sanitizeAgentOutput } from '../../src/renderer/components/Terminal/agent-chat-output';
+import { appendAgentOutput, buildAgentConnectCommand, sanitizeAgentOutput } from '../../src/renderer/components/Terminal/agent-chat-output';
 
 describe('AI chat transcript', () => {
   it('removes terminal control sequences from provider output', () => {
@@ -13,5 +13,12 @@ describe('AI chat transcript', () => {
 
   it('collapses terminal redraw noise', () => {
     expect(sanitizeAgentOutput('Ответ\rОтвет\n\n\nПродолжение')).toBe('Ответ\nПродолжение');
+  });
+
+  it('builds provider-native model and effort connection commands', () => {
+    expect(buildAgentConnectCommand('claude-code', 'sonnet', 'high'))
+      .toBe('claude.cmd --model sonnet --effort high');
+    expect(buildAgentConnectCommand('codex', 'gpt-5.4', 'xhigh'))
+      .toBe('codex.cmd --model gpt-5.4 -c model_reasoning_effort="xhigh"');
   });
 });

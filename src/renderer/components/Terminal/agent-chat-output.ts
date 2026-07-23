@@ -19,3 +19,19 @@ export function appendAgentOutput(current: string, chunk: string, limit = 20_000
   const next = `${current}${chunk}`;
   return next.length > limit ? next.slice(-limit) : next;
 }
+
+export function buildAgentConnectCommand(
+  preset: 'claude-code' | 'codex',
+  model: string,
+  effort: string,
+): string {
+  const modelArg = model === 'default' ? '' : ` --model ${model}`;
+  if (preset === 'claude-code') {
+    const effortArg = effort === 'default' ? '' : ` --effort ${effort}`;
+    return `claude.cmd${modelArg}${effortArg}`;
+  }
+  const effortArg = effort === 'default'
+    ? ''
+    : ` -c model_reasoning_effort="${effort}"`;
+  return `codex.cmd${modelArg}${effortArg}`;
+}
