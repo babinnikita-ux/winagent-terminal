@@ -37,3 +37,5 @@ npm.cmd run dev
 из подтверждённых источников; при отсутствии надёжных данных показывается
 честный статус недоступности. Подробнее: [лимиты провайдеров](docs/PROVIDER_USAGE.md),
 [новый UI](docs/NEW_UI.md) и [безопасность интеграций](docs/SECURITY_PROVIDER_INTEGRATIONS.md).
+
+![Основной экран русского интерфейса](docs/screenshots/claude-ui-main.png)

@@ -43,8 +43,8 @@ export default function ConfirmCloseDialog() {
     .filter((t): t is string => !!t);
   const message =
     pendingIds.length === 1
-      ? `Close "${titles[0] ?? 'this session'}"?`
-      : `Close ${pendingIds.length} sessions?`;
+      ? `Закрыть «${titles[0] ?? 'эту сессию'}»?`
+      : `Закрыть сессии: ${pendingIds.length}?`;
 
   return (
     <div className="confirm-dialog__overlay" onClick={cancelPendingClose}>
@@ -57,17 +57,17 @@ export default function ConfirmCloseDialog() {
       >
         <div className="confirm-dialog__title">{message}</div>
         <div className="confirm-dialog__message">
-          Everything running inside — shells, agents, unsaved tool state — will be terminated.
+          Все процессы внутри — оболочки, агенты и несохранённое состояние инструментов — будут завершены.
         </div>
         <div className="confirm-dialog__actions">
           <button ref={cancelRef} className="confirm-dialog__btn" onClick={cancelPendingClose}>
-            Cancel
+            Отмена
           </button>
           <button
             className="confirm-dialog__btn confirm-dialog__btn--danger"
             onClick={confirmPendingClose}
           >
-            {pendingIds.length === 1 ? 'Close session' : `Close ${pendingIds.length} sessions`}
+            {pendingIds.length === 1 ? 'Закрыть сессию' : `Закрыть сессии: ${pendingIds.length}`}
           </button>
         </div>
       </div>

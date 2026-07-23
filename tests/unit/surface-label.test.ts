@@ -40,9 +40,9 @@ describe('surface labels', () => {
   });
 
   it('uses stable labels for non-terminal surface types', () => {
-    expect(getSurfaceLabel(surface('surf-browser', { type: 'browser' }))).toBe('Browser');
+    expect(getSurfaceLabel(surface('surf-browser', { type: 'browser' }))).toBe('Браузер');
     expect(getSurfaceLabel(surface('surf-markdown', { type: 'markdown' }))).toBe('Markdown');
-    expect(getSurfaceLabel(surface('surf-diff', { type: 'diff' }))).toBe('Diff');
+    expect(getSurfaceLabel(surface('surf-diff', { type: 'diff' }))).toBe('Изменения');
   });
 
   it('shows the folder name from currentCwd for terminal labels', () => {

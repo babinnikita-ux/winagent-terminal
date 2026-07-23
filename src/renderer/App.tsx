@@ -25,12 +25,6 @@ import type {
   SurfaceDragPreviewTarget,
 } from './components/SplitPane/drag-preview-types';
 import { buildSurfaceDragPreview } from './components/SplitPane/surface-drag-preview';
-import WorkbenchShell from './workbench/WorkbenchShell';
-import ChatMode from './workbench/chat/ChatMode';
-import WorkflowMode from './workbench/workflow/WorkflowMode';
-import RunsMode from './workbench/runs/RunsMode';
-import WorkspaceMode from './workbench/workspace/WorkspaceMode';
-import { useWorkbenchStore } from './workbench/store';
 
 const DEFAULT_SIDEBAR_WIDTH = 292;
 
@@ -308,8 +302,6 @@ export default function App() {
 
   useUiTheme();
 
-  const activeWorkbenchMode = useWorkbenchStore((state) => state.activeMode);
-  const setActiveWorkbenchMode = useWorkbenchStore((state) => state.setActiveMode);
   useEffect(() => { document.documentElement.lang = language; }, [language]);
 
   const [focusedPaneId, setFocusedPaneId] = useState<PaneId | null>(null);
@@ -894,17 +886,7 @@ export default function App() {
         onMarkAllNotificationsRead={() => markAllRead()}
       />}
 
-      <WorkbenchShell
-        activeMode={activeWorkbenchMode}
-        onSelectMode={setActiveWorkbenchMode}
-        onOpenSettings={() => setSettingsOpen(true)}
-        onOpenHelp={() => setTutorialOpen(true)}
-      >
-        {activeWorkbenchMode === 'chat' && <ChatMode />}
-        {activeWorkbenchMode === 'workflow' && <WorkflowMode />}
-        {activeWorkbenchMode === 'runs' && <RunsMode />}
-        <WorkspaceMode active={activeWorkbenchMode === 'workspace'}>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <main className="workspace-shell">
         {sidebarVisible && !focusMode ? (
           <Sidebar
             workspaces={workspaces}
@@ -1088,9 +1070,7 @@ export default function App() {
             </div>
           </>
         )}
-      </div>
-        </WorkspaceMode>
-      </WorkbenchShell>
+      </main>
 
       {commandPaletteOpen && (
         <CommandPalette

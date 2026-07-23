@@ -28,15 +28,15 @@ export function getSurfaceLabel(surface: SurfaceRef, agentLabel?: string, worksp
     case 'terminal': {
       const folder = surface.currentCwd ? cwdFolderName(surface.currentCwd) : null;
       if (folder) return folder;
-      return getShellLabel(surface.shell || workspaceShell) || 'Terminal';
+      return getShellLabel(surface.shell || workspaceShell) || 'Терминал';
     }
     case 'browser':
-      return 'Browser';
+      return 'Браузер';
     case 'markdown':
       return 'Markdown';
     case 'diff':
-      return 'Diff';
+      return 'Изменения';
     default:
-      return 'Tab';
+      return 'Вкладка';
   }
 }

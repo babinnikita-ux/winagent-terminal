@@ -14,38 +14,38 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    title: `Welcome to ${APP_CONFIG.productName}`,
-    body: 'WinAgent Terminal is a terminal multiplexer for parallel AI coding work. This quick tour will show you the essentials.',
+    title: `Добро пожаловать в ${APP_CONFIG.productName}`,
+    body: 'WinAgent Terminal — терминальный мультиплексор для параллельной работы с AI. Коротко покажем основные возможности.',
     shortcuts: [],
   },
   {
-    title: 'Workspaces',
-    body: 'The sidebar on the left shows your workspaces. Each workspace is an independent session with its own terminal layout. Create new ones with Ctrl+N. Double-click a workspace title to rename it.',
+    title: 'Рабочие области',
+    body: 'Слева находятся независимые рабочие области со своими терминалами и раскладками. Создайте новую через Ctrl+N, переименуйте двойным щелчком.',
     shortcuts: ['Ctrl+N', 'Ctrl+B'],
   },
   {
-    title: 'Split Panes',
-    body: 'Split your terminals horizontally or vertically. Each pane runs its own shell. Drag dividers to resize. Zoom any pane to full size with Ctrl+Shift+Enter.',
+    title: 'Разделение панелей',
+    body: 'Разделяйте терминалы по горизонтали или вертикали. Размер меняется перетаскиванием границы, выбранная панель разворачивается через Ctrl+Shift+Enter.',
     shortcuts: ['Ctrl+D', 'Ctrl+Shift+D'],
   },
   {
-    title: 'Surface Tabs',
-    body: 'Each pane can have multiple tabs — terminals, browser panels, or markdown views. Drag tabs between panes to reorganize. Create new tabs with Ctrl+T.',
+    title: 'Вкладки',
+    body: 'В каждой панели могут быть терминалы, браузер и Markdown. Перетаскивайте вкладки между панелями и создавайте новые через Ctrl+T.',
     shortcuts: ['Ctrl+T', 'Ctrl+W'],
   },
   {
-    title: 'Browser Panel',
-    body: 'The browser panel on the right lets you preview what your agents build. Toggle it with Ctrl+Shift+I. Navigate to localhost or any URL. The browser is scriptable via the socket API.',
+    title: 'Панель браузера',
+    body: 'Справа можно открыть результат работы агента или localhost. Панель переключается сочетанием Ctrl+Shift+I и изолирована от привилегий Electron.',
     shortcuts: ['Ctrl+Shift+I'],
   },
   {
-    title: 'Notifications',
-    body: 'When an agent needs your attention, its pane gets a blue ring and the workspace badge increments. A Windows toast notification fires too. Jump to the latest unread with Ctrl+Shift+U.',
+    title: 'Требует внимания',
+    body: 'Когда агенту нужен ответ, рабочая область получает индикатор и уведомление Windows. К последнему непрочитанному событию ведёт Ctrl+Shift+U.',
     shortcuts: ['Ctrl+Shift+U'],
   },
   {
-    title: "You're all set",
-    body: "You can always reopen this guide from the help button (?) in the title bar. For the full keyboard shortcuts, open Settings with Ctrl+, or the Command Palette with Ctrl+Shift+P.",
+    title: 'Всё готово',
+    body: 'Эту справку можно снова открыть кнопкой «?». Полный список сочетаний находится в настройках, глобальная палитра команд открывается через Ctrl+Shift+P.',
     shortcuts: [],
   },
 ];
@@ -70,7 +70,7 @@ export default function Tutorial({ onClose }: TutorialProps) {
       <div className="tutorial-card">
         {!isLast && (
           <button className="tutorial-skip" onClick={onClose}>
-            Skip
+            Пропустить
           </button>
         )}
 
@@ -102,7 +102,7 @@ export default function Tutorial({ onClose }: TutorialProps) {
             onClick={handlePrevious}
             disabled={isFirst}
           >
-            Previous
+            Назад
           </button>
 
           <span className="tutorial-step-counter">
@@ -111,11 +111,11 @@ export default function Tutorial({ onClose }: TutorialProps) {
 
           {isLast ? (
             <button className="tutorial-btn tutorial-btn--primary" onClick={onClose}>
-              Get Started
+              Начать работу
             </button>
           ) : (
             <button className="tutorial-btn tutorial-btn--primary" onClick={handleNext}>
-              Next
+              Далее
             </button>
           )}
         </div>
