@@ -376,6 +376,7 @@ export const DEFAULT_BROWSER_PREFS: BrowserPrefs = {
  */
 export interface AppearancePrefs {
   uiTheme: 'system' | 'dark' | 'light';
+  uiDensity: 'compact' | 'normal' | 'spacious';
   /**
    * Custom background parallel to theming (issue #89, Wave-style `bg`).
    * Any CSS `background` shorthand: gradients, colors, url(...) images.
@@ -393,6 +394,7 @@ export const DEFAULT_APPEARANCE_PREFS: AppearancePrefs = {
   // 0.14.0, so existing users' chrome must not change color on first launch
   // after upgrading. New users can switch to 'system'/'light' in Settings.
   uiTheme: 'dark',
+  uiDensity: 'normal',
   customBackgroundEnabled: false,
   customBackground: '',
   terminalBgOpacity: 88,

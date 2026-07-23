@@ -334,6 +334,7 @@ export default function App() {
   const [isResizingBrowser, setIsResizingBrowser] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   // Per-workspace hook activity: workspaceId → { lastTool, toolCount, lastSeen }
   const [hookActivity, setHookActivity] = useState<Record<string, { lastTool: string; toolCount: number; lastSeen: number }>>({});
   // Per-surface Claude activity (parsed from terminal output)
@@ -718,7 +719,7 @@ export default function App() {
   }, []);
 
   const handlePaletteAction = useCallback((action: string) => {
-    console.log(`[wmux] Command palette action: ${action}`);
+    if (action === 'toggleFocusMode') setFocusMode((active) => !active);
     setCommandPaletteOpen(false);
   }, []);
 
@@ -877,10 +878,10 @@ export default function App() {
   const titlebarText = activeWorkspace?.title ?? '';
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className={focusMode ? 'app-shell app-shell--focus' : 'app-shell'} style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {tutorialOpen && <Tutorial onClose={handleTutorialClose} />}
       {settingsOpen && <SettingsWindow onClose={() => setSettingsOpen(false)} />}
-      <Titlebar
+      {!focusMode && <Titlebar
         title={titlebarText}
         onHelpClick={() => setTutorialOpen(true)}
         onDevToolsClick={() => window.wmux?.system?.toggleDevTools?.()}
@@ -891,7 +892,7 @@ export default function App() {
         onToggleNotificationPanel={handleToggleNotifPanel}
         onNotificationJump={handleNotificationJump}
         onMarkAllNotificationsRead={() => markAllRead()}
-      />
+      />}
 
       <WorkbenchShell
         activeMode={activeWorkbenchMode}
@@ -904,7 +905,7 @@ export default function App() {
         {activeWorkbenchMode === 'runs' && <RunsMode />}
         <WorkspaceMode active={activeWorkbenchMode === 'workspace'}>
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {sidebarVisible ? (
+        {sidebarVisible && !focusMode ? (
           <Sidebar
             workspaces={workspaces}
             activeWorkspaceId={activeWorkspaceId}
@@ -1006,7 +1007,7 @@ export default function App() {
         </div>
 
         {/* Right: browser panel */}
-        {browserOpen && (
+        {browserOpen && !focusMode && (
           <>
             <div
               style={{

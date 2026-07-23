@@ -59,6 +59,18 @@ export default function GeneralSettings() {
           ))}
         </select>
       </div>
+      <div className="settings-row">
+        <label className="settings-label">Плотность интерфейса</label>
+        <select
+          className="settings-select"
+          value={appearancePrefs.uiDensity ?? 'normal'}
+          onChange={(e) => setAppearancePrefs({ uiDensity: e.target.value as AppearancePrefs['uiDensity'] })}
+        >
+          <option value="compact">Компактная</option>
+          <option value="normal">Обычная</option>
+          <option value="spacious">Просторная</option>
+        </select>
+      </div>
 
       <p className="settings-hint">{t('settings.general.languageHint')}</p>
 
