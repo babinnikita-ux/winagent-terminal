@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { translate, detectDefaultLanguage, LANGUAGES, SUPPORTED_LANGUAGES } from '../../src/renderer/i18n';
+import {
+  translate,
+  detectDefaultLanguage,
+  getMissingTranslationKeys,
+  LANGUAGES,
+  SUPPORTED_LANGUAGES,
+} from '../../src/renderer/i18n';
 
 // The i18n layer (issue #56) backs the Settings language switcher. These cover
 // the fallback chain (active language → English → key) and locale detection so a
@@ -24,6 +30,10 @@ describe('i18n: translate (issue #56)', () => {
   it('exposes the three shipped languages', () => {
     expect(SUPPORTED_LANGUAGES).toEqual(['ru', 'en', 'fr', 'zh']);
     expect(LANGUAGES.map((l) => l.label)).toEqual(['Русский', 'English', 'Français', '中文']);
+  });
+
+  it('keeps the primary Russian dictionary in parity with English', () => {
+    expect(getMissingTranslationKeys('ru')).toEqual([]);
   });
 });
 
