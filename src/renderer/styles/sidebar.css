@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--ui-bg-0);
+  background: var(--ui-sidebar);
   border-right: 1px solid rgba(var(--ui-overlay-rgb), 0.06);
   user-select: none;
   overflow: hidden;
@@ -84,11 +84,9 @@
   background: rgba(var(--ui-overlay-rgb), 0.04);
 }
 
-/* No !important: WorkspaceRow sets inline backgroundColor to workspace.customColor
-   when set, otherwise to #0091FF. Inline styles already beat class rules — leaving
-   !important here blocked user-picked colors (issue #10). */
 .workspace-row--active {
-  background: #0091FF;
+  background: var(--ui-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-accent) 18%, transparent);
 }
 
 /* Left rail indicator */
@@ -106,7 +104,7 @@
 }
 
 .workspace-row--active .workspace-row__rail {
-  background: rgba(var(--ui-overlay-rgb), 0.5);
+  background: var(--ui-accent);
   opacity: 1;
 }
 
@@ -130,7 +128,7 @@
 }
 
 .workspace-row--active .workspace-row__title {
-  color: #ffffff;
+  color: var(--ui-text-primary);
 }
 
 /* Close button */
@@ -161,12 +159,12 @@
 }
 
 .workspace-row--active .workspace-row__close {
-  color: rgba(var(--ui-overlay-rgb), 0.5);
+  color: var(--ui-text-muted);
 }
 
 .workspace-row--active .workspace-row__close:hover {
-  color: white;
-  background: rgba(var(--ui-overlay-rgb), 0.15);
+  color: var(--ui-text-primary);
+  background: var(--ui-surface-hover);
 }
 
 /* Rename input */
@@ -217,7 +215,7 @@
 }
 
 .workspace-row--active .workspace-row__status {
-  color: rgba(var(--ui-overlay-rgb), 0.8);
+  color: var(--ui-text-secondary);
 }
 
 /* Context line: "branch* · ~/path/to/dir" */
@@ -233,7 +231,7 @@
 }
 
 .workspace-row--active .workspace-row__context {
-  color: rgba(var(--ui-overlay-rgb), 0.65);
+  color: var(--ui-text-muted);
 }
 
 /* Legacy meta-line — kept for agent skill display */
@@ -248,7 +246,7 @@
 }
 
 .workspace-row--active .workspace-row__meta-line {
-  color: rgba(var(--ui-overlay-rgb), 0.7);
+  color: var(--ui-text-secondary);
 }
 
 /* PR info */
@@ -271,7 +269,7 @@
 }
 
 .workspace-row--active .workspace-row__pr {
-  color: rgba(var(--ui-overlay-rgb), 0.85);
+  color: var(--ui-text-secondary);
 }
 
 /* Unread badge */
@@ -294,7 +292,7 @@
 }
 
 .workspace-row--active .unread-badge {
-  background: rgba(var(--ui-overlay-rgb), 0.25);
+  background: var(--ui-accent);
 }
 
 /* Resize handle */
@@ -1156,3 +1154,11 @@
 .orch-panel[data-collapsed="true"] .orch-panel__dismiss {
   display: none;
 }
+.provider-usage { padding: 12px 10px 4px; border-bottom: 1px solid var(--ui-border); }
+.sidebar-section-title { color: var(--ui-text-muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: 0 4px 8px; }
+.provider-usage-card { width:100%; display:flex; gap:10px; align-items:center; padding:7px; border:0; border-radius:10px; background:transparent; color:var(--ui-text-primary); text-align:left; cursor:pointer; }
+.provider-usage-card:hover { background:var(--ui-surface-hover); }.provider-usage-card small { display:block; color:var(--ui-text-secondary); margin-top:2px; }.usage-ring { --usage:0; position:relative; width:32px; height:32px; border-radius:50%; background:conic-gradient(var(--ui-success) calc(var(--usage)*1%), var(--ui-border) 0); display:grid; place-items:center; flex:none; }.usage-ring.warning { background:conic-gradient(var(--ui-warning) calc(var(--usage)*1%), var(--ui-border) 0); }.usage-ring.critical { background:conic-gradient(var(--ui-danger) calc(var(--usage)*1%), var(--ui-border) 0); }.usage-ring::before { content:''; position:absolute; width:24px; height:24px; border-radius:50%; background:var(--ui-sidebar); }.usage-ring span { z-index:1; font-size:9px; }
+.sidebar__section-heading { display:flex; align-items:center; justify-content:space-between; padding:14px 14px 7px; color:var(--ui-text-muted); font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+.sidebar__section-heading button { width:24px; height:24px; display:grid; place-items:center; padding:0; border:1px solid var(--ui-border); border-radius:7px; color:var(--ui-text-secondary); background:transparent; }
+.sidebar__empty { margin:8px 12px; padding:18px 12px; border:1px dashed var(--ui-border-strong); border-radius:11px; color:var(--ui-text-muted); text-align:center; font-size:12px; }
+.sidebar__new-btn { width:auto!important; padding:0 12px!important; font-size:12px!important; }

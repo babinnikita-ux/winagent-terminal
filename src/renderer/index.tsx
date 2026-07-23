@@ -4,6 +4,7 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import './styles/theme-vars.css';
 import './styles/global.css';
+import './styles/workbench.css';
 import { initNotificationSound } from './notification-sound';
 import { APP_CONFIG } from '../shared/app-config';
 

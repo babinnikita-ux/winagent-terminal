@@ -104,6 +104,12 @@ export default function CommandPalette({ onClose, onAction }: CommandPaletteProp
         })();
       },
     });
+    items.push({
+      id: 'command:focus-mode',
+      label: 'Переключить режим фокусировки',
+      category: t('palette.category.actions'),
+      action: () => onAction('toggleFocusMode'),
+    });
 
     // Category: Workspaces — switch to each workspace by name
     for (const ws of workspaces) {

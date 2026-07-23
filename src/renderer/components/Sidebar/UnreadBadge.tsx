@@ -5,12 +5,12 @@ interface UnreadBadgeProps {
   isSelected: boolean;
 }
 
-export default function UnreadBadge({ count, isSelected }: UnreadBadgeProps) {
+export default function UnreadBadge({ count, isSelected: _isSelected }: UnreadBadgeProps) {
   return (
     <span
       className="unread-badge"
       style={{
-        backgroundColor: isSelected ? 'rgba(255,255,255,0.25)' : '#0091FF',
+        backgroundColor: 'var(--ui-accent)',
       }}
     >
       {count}

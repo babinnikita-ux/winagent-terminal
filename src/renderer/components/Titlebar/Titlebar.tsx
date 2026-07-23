@@ -35,11 +35,17 @@ export default function Titlebar({
   return (
     <div className="titlebar">
       <div className="titlebar__left">
-        <span className="titlebar__logo" aria-label={APP_CONFIG.productName} title={APP_CONFIG.productName}>
-          WA
+        <span className="titlebar__logo" aria-label={APP_CONFIG.productName}>
+          <span className="titlebar__mark">W</span>
+          <span className="titlebar__wordmark">WinAgent</span>
         </span>
-        <button className="titlebar__btn" onClick={onHelpClick} title={t('titlebar.help')}>?</button>
-        <button className="titlebar__btn" onClick={onDevToolsClick} title={t('titlebar.devtools')}>&lt;/&gt;</button>
+        <span className="titlebar__divider" aria-hidden="true" />
+        <span className="titlebar__project">{title || 'Новая сессия'}</span>
+      </div>
+      <div className="titlebar__center" aria-hidden="true">
+        <span>Рабочее пространство</span>
+      </div>
+      <div className="titlebar__actions">
         <NotificationBell
           notifications={notifications}
           workspaceNames={workspaceNames}
@@ -49,6 +55,7 @@ export default function Titlebar({
           onMarkAllRead={onMarkAllNotificationsRead}
         />
         <UpdateBadge />
+        <button className="titlebar__btn" onClick={onHelpClick} title={t('titlebar.help')} aria-label={t('titlebar.help')}>?</button>
         <button
           className="titlebar__btn"
           onClick={onSettingsClick}
@@ -58,8 +65,8 @@ export default function Titlebar({
             <path d="M9.837.187a1.25 1.25 0 0 0-1.674 0L7.17 1.08a.25.25 0 0 1-.236.063l-1.181-.316a1.25 1.25 0 0 0-1.533.887l-.316 1.18a.25.25 0 0 1-.173.173l-1.18.316a1.25 1.25 0 0 0-.887 1.533l.316 1.181a.25.25 0 0 1-.063.236l-.894.993a1.25 1.25 0 0 0 0 1.674l.894.993a.25.25 0 0 1 .063.236l-.316 1.181a1.25 1.25 0 0 0 .887 1.533l1.18.316a.25.25 0 0 1 .173.173l.316 1.18a1.25 1.25 0 0 0 1.533.887l1.181-.316a.25.25 0 0 1 .236.063l.993.894a1.25 1.25 0 0 0 1.674 0l.993-.894a.25.25 0 0 1 .236-.063l1.181.316a1.25 1.25 0 0 0 1.533-.887l.316-1.18a.25.25 0 0 1 .173-.173l1.18-.316a1.25 1.25 0 0 0 .887-1.533l-.316-1.181a.25.25 0 0 1 .063-.236l.894-.993a1.25 1.25 0 0 0 0-1.674l-.894-.993a.25.25 0 0 1-.063-.236l.316-1.181a1.25 1.25 0 0 0-.887-1.533l-1.18-.316a.25.25 0 0 1-.173-.173l-.316-1.18a1.25 1.25 0 0 0-1.533-.887l-1.181.316a.25.25 0 0 1-.236-.063L9.837.187ZM8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
           </svg>
         </button>
+        <button className="titlebar__btn titlebar__more" onClick={onDevToolsClick} title={t('titlebar.devtools')} aria-label="Дополнительные действия">•••</button>
       </div>
-      <span className="titlebar__title">{title ?? ''}</span>
       <div className="titlebar__right" />
     </div>
   );

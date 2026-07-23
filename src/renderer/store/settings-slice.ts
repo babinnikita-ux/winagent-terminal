@@ -80,7 +80,7 @@ function loadPersistedArray<T>(key: string): T[] {
 
 // Scalar-valued settings (the UI language, issue #56) need their own loader:
 // loadPersisted returns {} for a missing key, which isn't a usable string. Falls
-// back to the OS/browser locale on first launch, then English.
+// back to Russian, the product default, on first launch.
 function loadPersistedLanguage(): Language {
   const fromFile = FILE_SETTINGS[STORAGE_KEYS.language];
   let candidate = typeof fromFile === 'string' ? fromFile : '';
@@ -93,7 +93,7 @@ function loadPersistedLanguage(): Language {
       }
     } catch { /* localStorage unavailable */ }
   }
-  if (candidate === 'en' || candidate === 'fr' || candidate === 'zh') return candidate;
+  if (candidate === 'en' || candidate === 'fr' || candidate === 'zh' || candidate === 'ru') return candidate;
   return detectDefaultLanguage();
 }
 
@@ -365,7 +365,7 @@ export interface BrowserPrefs {
 export const DEFAULT_BROWSER_PREFS: BrowserPrefs = {
   searchEngine: 'google',
   devToolsIcon: 'default',
-  openOnStartup: true,
+  openOnStartup: false,
 };
 
 // ─── Appearance settings (issue #67) ──────────────────────────────────────────
@@ -376,6 +376,7 @@ export const DEFAULT_BROWSER_PREFS: BrowserPrefs = {
  */
 export interface AppearancePrefs {
   uiTheme: 'system' | 'dark' | 'light';
+  uiDensity: 'compact' | 'normal' | 'spacious';
   /**
    * Custom background parallel to theming (issue #89, Wave-style `bg`).
    * Any CSS `background` shorthand: gradients, colors, url(...) images.
@@ -393,6 +394,7 @@ export const DEFAULT_APPEARANCE_PREFS: AppearancePrefs = {
   // 0.14.0, so existing users' chrome must not change color on first launch
   // after upgrading. New users can switch to 'system'/'light' in Settings.
   uiTheme: 'dark',
+  uiDensity: 'normal',
   customBackgroundEnabled: false,
   customBackground: '',
   terminalBgOpacity: 88,

@@ -5,10 +5,10 @@ export default function BrowserSettings() {
 
   return (
     <div className="settings-section">
-      <h3 className="settings-section-title">Search</h3>
+      <h3 className="settings-section-title">Поиск</h3>
 
       <div className="settings-row">
-        <label className="settings-label">Default search engine</label>
+        <label className="settings-label">Поисковая система</label>
         <select
           className="settings-select"
           value={browserPrefs.searchEngine}
@@ -26,23 +26,10 @@ export default function BrowserSettings() {
       </div>
 
       <div className="settings-divider" />
-      <h3 className="settings-section-title">Startup</h3>
+      <h3 className="settings-section-title">Инструменты разработчика</h3>
 
       <div className="settings-row">
-        <label className="settings-label">Open browser panel on startup</label>
-        <input
-          type="checkbox"
-          className="settings-toggle"
-          checked={browserPrefs.openOnStartup}
-          onChange={(e) => setBrowserPrefs({ openOnStartup: e.target.checked })}
-        />
-      </div>
-
-      <div className="settings-divider" />
-      <h3 className="settings-section-title">Developer Tools</h3>
-
-      <div className="settings-row">
-        <label className="settings-label">DevTools icon</label>
+        <label className="settings-label">Значок DevTools</label>
         <select
           className="settings-select"
           value={browserPrefs.devToolsIcon}
@@ -52,9 +39,9 @@ export default function BrowserSettings() {
             })
           }
         >
-          <option value="default">Default</option>
-          <option value="compact">Compact</option>
-          <option value="hidden">Hidden</option>
+          <option value="default">Обычный</option>
+          <option value="compact">Компактный</option>
+          <option value="hidden">Скрытый</option>
         </select>
       </div>
     </div>

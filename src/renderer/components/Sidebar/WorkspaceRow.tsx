@@ -13,16 +13,16 @@ function getAllSurfaceIds(tree: SplitNode): string[] {
 /** Human-readable label for a tool name */
 function getToolLabel(tool: string): string {
   switch (tool) {
-    case 'Bash': return 'Running command...';
-    case 'Read': return 'Reading file...';
-    case 'Edit': return 'Editing...';
-    case 'Write': return 'Writing file...';
-    case 'Grep': return 'Searching code...';
-    case 'Glob': return 'Finding files...';
-    case 'Agent': return 'Running agent...';
-    case 'WebSearch': return 'Searching web...';
-    case 'WebFetch': return 'Fetching page...';
-    case 'Skill': return 'Loading skill...';
+    case 'Bash': return 'Выполняется команда…';
+    case 'Read': return 'Чтение файла…';
+    case 'Edit': return 'Редактирование…';
+    case 'Write': return 'Запись файла…';
+    case 'Grep': return 'Поиск в коде…';
+    case 'Glob': return 'Поиск файлов…';
+    case 'Agent': return 'Работает агент…';
+    case 'WebSearch': return 'Поиск в интернете…';
+    case 'WebFetch': return 'Загрузка страницы…';
+    case 'Skill': return 'Загрузка навыка…';
     default: return tool.includes(':') ? `MCP: ${tool}` : `${tool}...`;
   }
 }
@@ -77,7 +77,6 @@ export default function WorkspaceRow({
     return () => document.removeEventListener('wmux:rename-workspace', handler);
   }, [isActive, workspace.title]);
 
-  const activeBackground = workspace.customColor ?? '#0091FF';
   // 15% alpha tint for inactive colored rows. The previous 5% (`0D`) was
   // indistinguishable from the sidebar background on dark themes (issue #80).
   const customColorTint = workspace.customColor
@@ -119,8 +118,8 @@ export default function WorkspaceRow({
   }, [claudeActivity, workspace.splitTree]);
 
   let rowStyle: React.CSSProperties = {};
-  if (isActive) {
-    rowStyle = { backgroundColor: activeBackground };
+  if (isActive && workspace.customColor) {
+    rowStyle = { backgroundColor: `${workspace.customColor}24` };
   } else if (customColorTint) {
     rowStyle = { backgroundColor: customColorTint };
   }
@@ -168,30 +167,30 @@ export default function WorkspaceRow({
     // Priority 0: user pinned the status by hand (issue #81) — detection
     // heuristics can misread tools that keep the shell "running" while idle.
     if (workspace.statusOverride) {
-      return workspace.statusOverride === 'running' ? 'Running' : 'Idle';
+      return workspace.statusOverride === 'running' ? 'Выполняется' : 'Ожидание';
     }
 
     // Priority 1: Claude is actively using a tool
     if (currentToolLabel) return currentToolLabel;
 
     // Priority 2: Claude was working but stopped → idle, not "Running"
-    if (claudeIsIdle) return 'Idle';
+    if (claudeIsIdle) return 'Ожидание';
 
     // Priority 3: Shell state from shell integration
     const state = workspace.shellState;
-    if (state === 'running') return 'Running';
-    if (state === 'interrupted') return 'Interrupted';
+    if (state === 'running') return 'Выполняется';
+    if (state === 'interrupted') return 'Прервано';
     if (state === 'idle') {
       return workspace.notificationText
-        ? `Done: ${workspace.notificationText}`
-        : 'Idle';
+        ? `Завершено: ${workspace.notificationText}`
+        : 'Ожидание';
     }
 
     // Priority 4: Notification text without shell state
     if (workspace.notificationText) return workspace.notificationText;
 
     // Priority 5: Default — always show something
-    return 'Idle';
+    return 'Ожидание';
   }, [workspace.statusOverride, currentToolLabel, claudeIsIdle, workspace.shellState, workspace.notificationText]);
 
   // ── Status color class ──
@@ -313,7 +312,7 @@ export default function WorkspaceRow({
             e.stopPropagation();
             onClose();
           }}
-          title="Close workspace"
+          title="Закрыть рабочую область"
         >
           &#x2715;
         </button>
@@ -327,7 +326,7 @@ export default function WorkspaceRow({
       {/* OSC 9;4 progress bar — only while a terminal reports progress */}
       {wsProgress && (
         <div className="workspace-row__progress" title={
-          wsProgress.state === 3 ? 'Working…' : `${wsProgress.value}%`
+          wsProgress.state === 3 ? 'В работе…' : `${wsProgress.value}%`
         }>
           <div className="workspace-row__progress-track">
             <div

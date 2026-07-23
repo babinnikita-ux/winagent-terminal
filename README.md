@@ -29,6 +29,15 @@ See [Architecture](docs/ARCHITECTURE.md), the
 and [troubleshooting](docs/TROUBLESHOOTING.md). See also
 [session restore](docs/SESSION_RESTORE.md) and [contributing](CONTRIBUTING.md).
 
+## Interface upgrade
+
+Russian is the default interface language. The application chrome now uses a
+warm light/dark design system, adjustable density and focus mode. The sidebar
+shows Claude, Gemini and Codex usage only when an adapter has confirmed real
+data; unsupported or unauthenticated sources remain explicitly unavailable.
+See [provider usage](docs/PROVIDER_USAGE.md), [new UI](docs/NEW_UI.md) and
+[provider integration security](docs/SECURITY_PROVIDER_INTEGRATIONS.md).
+
 ## License and attribution
 
 This codebase is an MIT-licensed derivative of `amirlehmam/wmux`; see

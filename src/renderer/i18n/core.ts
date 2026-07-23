@@ -321,18 +321,37 @@ export function translate(lang: Language, key: string, fallback?: string): strin
   return DICTS[lang]?.[key] ?? DICTS.en[key] ?? fallback ?? key;
 }
 
+export function getMissingTranslationKeys(language: Language): string[] {
+  const dictionaries: Record<Language, Dict> = { en, fr, ru, zh };
+  return Object.keys(en).filter((key) => dictionaries[language][key] === undefined);
+}
+
+export function interpolate(
+  template: string,
+  values: Readonly<Record<string, string | number>>,
+): string {
+  return template.replace(/\{\{([a-zA-Z0-9_.-]+)\}\}/g, (token, key: string) =>
+    Object.hasOwn(values, key) ? String(values[key]) : token);
+}
+
+export function pluralizeRu(
+  count: number,
+  forms: readonly [one: string, few: string, many: string],
+): string {
+  const absolute = Math.abs(Math.trunc(count));
+  const mod100 = absolute % 100;
+  const mod10 = absolute % 10;
+  const form = mod10 === 1 && mod100 !== 11
+    ? forms[0]
+    : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)
+      ? forms[1]
+      : forms[2];
+  return `${count} ${form}`;
+}
+
 /**
  * Best-effort default from the OS/browser locale so first-launch users (e.g. the
  * Chinese reporter of issue #56) see their language without touching Settings.
  * Falls back to English for anything unsupported.
  */
-export function detectDefaultLanguage(): Language {
-  try {
-    const nav = (globalThis as any).navigator?.language ?? 'en';
-    const base = String(nav).toLowerCase().split('-')[0];
-    if (SUPPORTED_LANGUAGES.includes(base as Language)) return base as Language;
-  } catch {
-    /* navigator unavailable (tests) */
-  }
-  return 'en';
-}
+export function detectDefaultLanguage(): Language { return 'ru'; }

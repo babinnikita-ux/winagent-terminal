@@ -28,6 +28,14 @@ contextBridge.exposeInMainWorld('wmux', {
       return () => ipcRenderer.removeListener(IPC_CHANNELS.PTY_EXIT, handler);
     },
   },
+  providerUsage: {
+    get: () => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_USAGE_GET),
+    refresh: (provider?: 'claude' | 'gemini' | 'codex') => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_USAGE_REFRESH, provider),
+    onUpdate: (callback: (usage: import('../shared/types').ProviderUsage[]) => void) => { const handler = (_event: Electron.IpcRendererEvent, usage: import('../shared/types').ProviderUsage[]) => callback(usage); ipcRenderer.on(IPC_CHANNELS.PROVIDER_USAGE_UPDATE, handler); return () => ipcRenderer.removeListener(IPC_CHANNELS.PROVIDER_USAGE_UPDATE, handler); },
+  },
+  chat: {
+    pickFiles: () => ipcRenderer.invoke(IPC_CHANNELS.CHAT_PICK_FILES) as Promise<{ canceled: boolean; paths: string[] }>,
+  },
   system: {
     platform: 'win32' as const,
     getShells: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_GET_SHELLS),

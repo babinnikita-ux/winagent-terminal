@@ -5,6 +5,7 @@ import { splitNode, removeLeaf, getAllPaneIds, findLeaf, adjustPaneRatio } from 
 import { PaneId, SplitNode } from '../../shared/types';
 import { copyTerminalText } from '../utils/copy-text';
 import { v4 as uuid } from 'uuid';
+import { isTextInputTarget } from '../workbench/keyboard';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -353,6 +354,7 @@ export function useKeyboardShortcuts(
     };
 
     function handleKeyDown(e: KeyboardEvent): void {
+      if (isTextInputTarget(e.target)) return;
       if (!isSafeToIntercept(e)) return;
 
       const shortcutEntries = Object.entries(shortcuts) as [ShortcutAction, ShortcutBinding][];

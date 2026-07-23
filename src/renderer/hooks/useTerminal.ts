@@ -41,6 +41,7 @@ interface UseTerminalOptions {
   /** Main-process launch preset; never contains credential material. */
   agentPreset?: AgentPreset;
   resumeAgentSession?: boolean;
+  onOutput?: (chunk: string) => void;
 }
 
 interface UseTerminalResult {
@@ -48,6 +49,7 @@ interface UseTerminalResult {
   fit: () => void;
   xtermRef: React.RefObject<Terminal | null>;
   searchAddonRef: React.RefObject<SearchAddon | null>;
+  sendText: (text: string) => void;
 }
 
 function treeHasSurface(node: SplitNode, surfaceId: string): boolean {
@@ -333,7 +335,7 @@ async function fetchTheme(name: string): Promise<ThemeConfig> {
   }
 }
 
-export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = true, colorScheme, startupCommands, agentPreset, resumeAgentSession }: UseTerminalOptions = {}): UseTerminalResult {
+export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = true, colorScheme, startupCommands, agentPreset, resumeAgentSession, onOutput }: UseTerminalOptions = {}): UseTerminalResult {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -345,6 +347,8 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
   // startup commands without listing them as a dependency.
   const startupCommandsRef = useRef<string[] | undefined>(startupCommands);
   startupCommandsRef.current = startupCommands;
+  const onOutputRef = useRef(onOutput);
+  onOutputRef.current = onOutput;
 
   // Subscribe to relevant settings so changes apply live.
   const prefs = useStore((s) => s.terminalPrefs);
@@ -713,6 +717,7 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
       // Wire PTY data → xterm
       const unsubData = window.wmux.pty.onData(id, (data: string) => {
         if (disposed) return;
+        onOutputRef.current?.(data);
         // Track SGR/button mouse enable (?1006h, ?1000h, ?1002h, ?1003h) and disable
         // so the wheel handler can distinguish tmux from a plain shell after remount.
         // Mirror the enable pattern for disable so any of the four modes clears the flag.
@@ -1029,5 +1034,9 @@ export function useTerminal({ surfaceId, shell, cwd, visible = true, focused = t
     };
   }, [visible, focused]);
 
-  return { terminalRef, fit, xtermRef, searchAddonRef };
+  const sendText = (text: string): void => {
+    if (ptyIdRef.current) window.wmux.pty.write(ptyIdRef.current, text);
+  };
+
+  return { terminalRef, fit, xtermRef, searchAddonRef, sendText };
 }

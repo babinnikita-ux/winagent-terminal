@@ -11,6 +11,11 @@ import { useStore } from '../store';
  */
 export function useUiTheme(): void {
   const uiTheme = useStore((s) => s.appearancePrefs.uiTheme);
+  const uiDensity = useStore((s) => s.appearancePrefs.uiDensity);
+
+  useEffect(() => {
+    document.documentElement.dataset.uiDensity = uiDensity ?? 'normal';
+  }, [uiDensity]);
 
   useEffect(() => {
     const root = document.documentElement;

@@ -20,13 +20,19 @@ import { saveNamedSession, loadNamedSession, listNamedSessions, deleteNamedSessi
 import { loadSettings, saveSetting } from './settings-store';
 import { getChangedFiles, getFileDiff } from './diff-provider';
 import { getAgentReadiness } from './proxyapi';
+import { ProviderUsageService } from './provider-usage';
 
 const ptyManager = new PtyManager();
 const notificationManager = new NotificationManager();
 const cdpBridge = new CDPBridge();
 const agentManager = new AgentManager(ptyManager);
+const providerUsage = new ProviderUsageService();
 
 export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstance?: CDPProxy): void {
+  providerUsage.start();
+  providerUsage.subscribe((usage) => { for (const win of BrowserWindow.getAllWindows()) if (!win.isDestroyed()) win.webContents.send(IPC_CHANNELS.PROVIDER_USAGE_UPDATE, usage); });
+  ipcMain.handle(IPC_CHANNELS.PROVIDER_USAGE_GET, () => providerUsage.getAll());
+  ipcMain.handle(IPC_CHANNELS.PROVIDER_USAGE_REFRESH, (_event, provider?: 'claude' | 'gemini' | 'codex') => providerUsage.refresh(provider));
   // Toggle DevTools for the renderer window
   ipcMain.on('toggle-devtools', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
@@ -367,6 +373,19 @@ export function registerIpcHandlers(windowManager: WindowManager, cdpProxyInstan
       return { canceled: true };
     }
     return { path: result.filePaths[0] };
+  });
+
+  ipcMain.handle(IPC_CHANNELS.CHAT_PICK_FILES, async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender) ?? undefined;
+    const result = await dialog.showOpenDialog(win as BrowserWindow, {
+      title: 'Добавить файлы в чат',
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Все файлы', extensions: ['*'] }],
+    });
+    return {
+      canceled: result.canceled,
+      paths: result.canceled ? [] : result.filePaths,
+    };
   });
 }
 

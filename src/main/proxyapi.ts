@@ -18,15 +18,22 @@ export interface AgentLaunch {
   env: Record<string, string>;
 }
 
-export function getAgentStartupCommand(preset: AgentPreset, resume: boolean): string {
-  const command = preset === 'claude-code' ? 'claude' : 'codex';
+export function getAgentStartupCommand(
+  preset: AgentPreset,
+  resume: boolean,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  const base = preset === 'claude-code' ? 'claude' : 'codex';
+  const command = platform === 'win32' ? `${base}.cmd` : base;
   if (!resume) return command;
   return preset === 'claude-code' ? `${command} --resume` : `${command} resume`;
 }
 
 function commandExists(command: string): boolean {
   try {
-    childProcess.execFileSync(process.platform === 'win32' ? 'where' : 'which', [command], {
+    childProcess.execFileSync(process.platform === 'win32' ? 'where' : 'which', [
+      process.platform === 'win32' ? `${command}.*` : command,
+    ], {
       windowsHide: true,
       timeout: 3000,
       stdio: 'ignore',
@@ -103,18 +110,16 @@ function ensureCodexConfig(): string {
  */
 export function buildAgentLaunch(preset: AgentPreset, env: NodeJS.ProcessEnv = process.env): AgentLaunch {
   const key = getProxyApiKey(env);
-  if (!key) {
-    throw new Error('ProxyAPI is not configured. Set PROXYAPI_KEY in the user environment and restart WinAgent Terminal.');
-  }
-
   if (preset === 'claude-code') {
     if (!commandExists('claude')) throw new Error('Claude Code CLI was not found on PATH.');
+    if (!key) return { env: {} };
     return {
       env: buildProxyApiEnvironment(preset, key),
     };
   }
 
   if (!commandExists('codex')) throw new Error('Codex CLI was not found on PATH.');
+  if (!key) return { env: {} };
   return {
     env: { ...buildProxyApiEnvironment(preset, key), CODEX_HOME: ensureCodexConfig() },
   };

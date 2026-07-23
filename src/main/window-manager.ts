@@ -55,9 +55,9 @@ export class WindowManager {
       title: APP_CONFIG.productName,
       titleBarStyle: 'hidden',
       titleBarOverlay: {
-        color: '#1a1a1a',
-        symbolColor: '#cccccc',
-        height: 38,
+        color: '#151411',
+        symbolColor: '#aaa197',
+        height: 46,
       },
       backgroundColor: '#1a1a1a',
       webPreferences: {
@@ -74,7 +74,6 @@ export class WindowManager {
     if (isDev) {
       const devPort = process.env.VITE_DEV_PORT || '5199';
       win.loadURL(`http://localhost:${devPort}`);
-      win.webContents.openDevTools({ mode: 'detach' });
     } else {
       win.loadFile(path.join(__dirname, '../renderer/index.html'));
     }

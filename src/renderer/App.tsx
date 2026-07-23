@@ -26,7 +26,7 @@ import type {
 } from './components/SplitPane/drag-preview-types';
 import { buildSurfaceDragPreview } from './components/SplitPane/surface-drag-preview';
 
-const DEFAULT_SIDEBAR_WIDTH = 240;
+const DEFAULT_SIDEBAR_WIDTH = 292;
 
 /** Get all surface IDs from a split tree */
 function getAllSurfaces(tree: SplitNode): string[] {
@@ -241,7 +241,7 @@ function tryReplaceTabSpawn(event: any, ws: WorkspaceInfo, setAgentMeta: (surfac
   return true;
 }
 
-/** Build the default 3-terminal split layout for new workspaces */
+/** Build the default Claude + Codex conversational workspace. */
 function buildDefaultSplitTree(): SplitNode {
   return {
     type: 'branch',
@@ -249,28 +249,23 @@ function buildDefaultSplitTree(): SplitNode {
     ratio: 0.5,
     children: [
       {
-        type: 'branch',
-        direction: 'horizontal',
-        ratio: 0.5,
-        children: [
-          {
-            type: 'leaf',
-            paneId: `pane-${uuid()}` as PaneId,
-            surfaces: [{ id: `surf-${uuid()}` as SurfaceId, type: 'terminal' }],
-            activeSurfaceIndex: 0,
-          },
-          {
-            type: 'leaf',
-            paneId: `pane-${uuid()}` as PaneId,
-            surfaces: [{ id: `surf-${uuid()}` as SurfaceId, type: 'terminal' }],
-            activeSurfaceIndex: 0,
-          },
-        ],
+        type: 'leaf',
+        paneId: `pane-${uuid()}` as PaneId,
+        surfaces: [{
+          id: `surf-${uuid()}` as SurfaceId,
+          type: 'terminal',
+          agentPreset: 'claude-code',
+        }],
+        activeSurfaceIndex: 0,
       },
       {
         type: 'leaf',
         paneId: `pane-${uuid()}` as PaneId,
-        surfaces: [{ id: `surf-${uuid()}` as SurfaceId, type: 'terminal' }],
+        surfaces: [{
+          id: `surf-${uuid()}` as SurfaceId,
+          type: 'terminal',
+          agentPreset: 'codex',
+        }],
         activeSurfaceIndex: 0,
       },
     ],
@@ -297,9 +292,12 @@ export default function App() {
     setAgentMeta,
     addNotification,
     toggleSidebar,
+    language,
   } = useStore();
 
   useUiTheme();
+
+  useEffect(() => { document.documentElement.lang = language; }, [language]);
 
   const [focusedPaneId, setFocusedPaneId] = useState<PaneId | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -317,12 +315,14 @@ export default function App() {
   // behind the split tree; terminals show it through their alpha'd theme bg.
   const appearancePrefs = useStore((s) => s.appearancePrefs);
   const customBgActive = appearancePrefs.customBackgroundEnabled && !!appearancePrefs.customBackground.trim();
-  // Browser panel auto-opens on startup unless disabled in Settings (issue #22).
-  const [browserOpen, setBrowserOpen] = useState(() => useStore.getState().browserPrefs.openOnStartup);
+  // Browser stays closed at startup. It is opened explicitly by the user so
+  // restored legacy preferences cannot unexpectedly navigate on every launch.
+  const [browserOpen, setBrowserOpen] = useState(false);
   const [browserWidth, setBrowserWidth] = useState(420);
   const [isResizingBrowser, setIsResizingBrowser] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   // Per-workspace hook activity: workspaceId → { lastTool, toolCount, lastSeen }
   const [hookActivity, setHookActivity] = useState<Record<string, { lastTool: string; toolCount: number; lastSeen: number }>>({});
   // Per-surface Claude activity (parsed from terminal output)
@@ -403,7 +403,7 @@ export default function App() {
       // No saved session — create default workspace
       if (useStore.getState().workspaces.length === 0) {
         createWorkspace({
-          title: 'Session 1',
+          title: 'Сессия 1',
           splitTree: buildDefaultSplitTree(),
         });
       }
@@ -707,7 +707,7 @@ export default function App() {
   }, []);
 
   const handlePaletteAction = useCallback((action: string) => {
-    console.log(`[wmux] Command palette action: ${action}`);
+    if (action === 'toggleFocusMode') setFocusMode((active) => !active);
     setCommandPaletteOpen(false);
   }, []);
 
@@ -866,10 +866,10 @@ export default function App() {
   const titlebarText = activeWorkspace?.title ?? '';
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className={focusMode ? 'app-shell app-shell--focus' : 'app-shell'} style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {tutorialOpen && <Tutorial onClose={handleTutorialClose} />}
       {settingsOpen && <SettingsWindow onClose={() => setSettingsOpen(false)} />}
-      <Titlebar
+      {!focusMode && <Titlebar
         title={titlebarText}
         onHelpClick={() => setTutorialOpen(true)}
         onDevToolsClick={() => window.wmux?.system?.toggleDevTools?.()}
@@ -880,10 +880,10 @@ export default function App() {
         onToggleNotificationPanel={handleToggleNotifPanel}
         onNotificationJump={handleNotificationJump}
         onMarkAllNotificationsRead={() => markAllRead()}
-      />
+      />}
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {sidebarVisible ? (
+      <main className="workspace-shell">
+        {sidebarVisible && !focusMode ? (
           <Sidebar
             workspaces={workspaces}
             activeWorkspaceId={activeWorkspaceId}
@@ -985,7 +985,7 @@ export default function App() {
         </div>
 
         {/* Right: browser panel */}
-        {browserOpen && (
+        {browserOpen && !focusMode && (
           <>
             <div
               style={{
@@ -1066,7 +1066,7 @@ export default function App() {
             </div>
           </>
         )}
-      </div>
+      </main>
 
       {commandPaletteOpen && (
         <CommandPalette

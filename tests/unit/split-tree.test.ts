@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createLeaf, splitNode, removeLeaf, findLeaf, updateRatio, getAllPaneIds, buildGridLayout, replaceSoleTerminalSurface } from '../../src/renderer/store/split-utils';
+import { createLeaf, splitNode, removeLeaf, findLeaf, updateRatio, getAllPaneIds, buildGridLayout, replaceSoleTerminalSurface, migrateTerminalPanesToAgentChats } from '../../src/renderer/store/split-utils';
 
 describe('split-tree', () => {
   it('creates a leaf node', () => {
@@ -57,6 +57,29 @@ describe('split-tree', () => {
     const tree = splitNode(leaf, 'pane-1', 'pane-2' as any, 'terminal', 'horizontal');
     const updated = updateRatio(tree, 'pane-1', 'pane-2', 1.5);
     if (updated.type === 'branch') expect(updated.ratio).toBe(0.9);
+  });
+});
+
+describe('migrateTerminalPanesToAgentChats', () => {
+  it('turns restored plain terminal panes into alternating Claude and Codex chats', () => {
+    const left = createLeaf('pane-1' as any, 'terminal');
+    const tree = splitNode(left, 'pane-1' as any, 'pane-2' as any, 'terminal', 'vertical');
+    const migrated = migrateTerminalPanesToAgentChats(tree);
+
+    expect(findLeaf(migrated, 'pane-1' as any)?.surfaces[0].agentPreset).toBe('claude-code');
+    expect(findLeaf(migrated, 'pane-2' as any)?.surfaces[0].agentPreset).toBe('codex');
+  });
+
+  it('preserves browser panes and explicitly configured agent chats', () => {
+    const claude = {
+      ...createLeaf('pane-1' as any, 'terminal'),
+      surfaces: [{ id: 'surf-claude' as any, type: 'terminal' as const, agentPreset: 'claude-code' as const }],
+    };
+    const tree = splitNode(claude, 'pane-1' as any, 'pane-2' as any, 'browser', 'vertical');
+    const migrated = migrateTerminalPanesToAgentChats(tree);
+
+    expect(findLeaf(migrated, 'pane-1' as any)?.surfaces[0].agentPreset).toBe('claude-code');
+    expect(findLeaf(migrated, 'pane-2' as any)?.surfaces[0].type).toBe('browser');
   });
 });
 
