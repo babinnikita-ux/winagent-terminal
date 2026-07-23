@@ -9,7 +9,9 @@ interface BrowserPaneProps {
   onUrlChange?: (url: string) => void;
 }
 
-export default function BrowserPane({ initialUrl = 'https://github.com/amirlehmam/wmux', surfaceId, workspaceId, onUrlChange }: BrowserPaneProps) {
+export const DEFAULT_BROWSER_URL = 'about:blank';
+
+export default function BrowserPane({ initialUrl = DEFAULT_BROWSER_URL, surfaceId, workspaceId, onUrlChange }: BrowserPaneProps) {
   // src is fixed to the initial page; all later navigation goes through loadURL
   // (below). Binding src to a mutable url state AND calling loadURL made every
   // navigation trigger two loads of the same URL, which raced and produced a

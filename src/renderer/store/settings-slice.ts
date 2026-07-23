@@ -365,7 +365,7 @@ export interface BrowserPrefs {
 export const DEFAULT_BROWSER_PREFS: BrowserPrefs = {
   searchEngine: 'google',
   devToolsIcon: 'default',
-  openOnStartup: true,
+  openOnStartup: false,
 };
 
 // ─── Appearance settings (issue #67) ──────────────────────────────────────────

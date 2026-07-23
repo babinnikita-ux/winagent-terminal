@@ -320,8 +320,9 @@ export default function App() {
   // behind the split tree; terminals show it through their alpha'd theme bg.
   const appearancePrefs = useStore((s) => s.appearancePrefs);
   const customBgActive = appearancePrefs.customBackgroundEnabled && !!appearancePrefs.customBackground.trim();
-  // Browser panel auto-opens on startup unless disabled in Settings (issue #22).
-  const [browserOpen, setBrowserOpen] = useState(() => useStore.getState().browserPrefs.openOnStartup);
+  // Browser stays closed at startup. It is opened explicitly by the user so
+  // restored legacy preferences cannot unexpectedly navigate on every launch.
+  const [browserOpen, setBrowserOpen] = useState(false);
   const [browserWidth, setBrowserWidth] = useState(420);
   const [isResizingBrowser, setIsResizingBrowser] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
