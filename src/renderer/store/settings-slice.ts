@@ -80,7 +80,7 @@ function loadPersistedArray<T>(key: string): T[] {
 
 // Scalar-valued settings (the UI language, issue #56) need their own loader:
 // loadPersisted returns {} for a missing key, which isn't a usable string. Falls
-// back to the OS/browser locale on first launch, then English.
+// back to Russian, the product default, on first launch.
 function loadPersistedLanguage(): Language {
   const fromFile = FILE_SETTINGS[STORAGE_KEYS.language];
   let candidate = typeof fromFile === 'string' ? fromFile : '';
@@ -93,7 +93,7 @@ function loadPersistedLanguage(): Language {
       }
     } catch { /* localStorage unavailable */ }
   }
-  if (candidate === 'en' || candidate === 'fr' || candidate === 'zh') return candidate;
+  if (candidate === 'en' || candidate === 'fr' || candidate === 'zh' || candidate === 'ru') return candidate;
   return detectDefaultLanguage();
 }
 

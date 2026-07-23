@@ -32,7 +32,7 @@ import RunsMode from './workbench/runs/RunsMode';
 import WorkspaceMode from './workbench/workspace/WorkspaceMode';
 import { useWorkbenchStore } from './workbench/store';
 
-const DEFAULT_SIDEBAR_WIDTH = 240;
+const DEFAULT_SIDEBAR_WIDTH = 292;
 
 /** Get all surface IDs from a split tree */
 function getAllSurfaces(tree: SplitNode): string[] {
@@ -303,12 +303,14 @@ export default function App() {
     setAgentMeta,
     addNotification,
     toggleSidebar,
+    language,
   } = useStore();
 
   useUiTheme();
 
   const activeWorkbenchMode = useWorkbenchStore((state) => state.activeMode);
   const setActiveWorkbenchMode = useWorkbenchStore((state) => state.setActiveMode);
+  useEffect(() => { document.documentElement.lang = language; }, [language]);
 
   const [focusedPaneId, setFocusedPaneId] = useState<PaneId | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -412,7 +414,7 @@ export default function App() {
       // No saved session — create default workspace
       if (useStore.getState().workspaces.length === 0) {
         createWorkspace({
-          title: 'Session 1',
+          title: 'Сессия 1',
           splitTree: buildDefaultSplitTree(),
         });
       }
