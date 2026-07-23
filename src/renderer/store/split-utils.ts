@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { SplitNode, PaneId, SurfaceId, SurfaceType } from '../../shared/types';
+import { SplitNode, PaneId, SurfaceId, SurfaceType, AgentPreset } from '../../shared/types';
 
 // ─── Leaf factory ────────────────────────────────────────────────────────────
 
@@ -124,6 +124,37 @@ export function updateRatio(
 export function getAllPaneIds(tree: SplitNode): PaneId[] {
   if (tree.type === 'leaf') return [tree.paneId];
   return [...getAllPaneIds(tree.children[0]), ...getAllPaneIds(tree.children[1])];
+}
+
+/**
+ * Upgrade legacy workspace layouts whose visible panes are still plain shells.
+ * Existing browser/markdown panes and already configured agent sessions remain
+ * untouched. Providers alternate in visual pane order: Claude, Codex, Claude…
+ */
+export function migrateTerminalPanesToAgentChats(tree: SplitNode): SplitNode {
+  let paneIndex = 0;
+  const migrate = (node: SplitNode): SplitNode => {
+    if (node.type === 'branch') {
+      const left = migrate(node.children[0]);
+      const right = migrate(node.children[1]);
+      return left === node.children[0] && right === node.children[1]
+        ? node
+        : { ...node, children: [left, right] };
+    }
+
+    const preset: AgentPreset = paneIndex % 2 === 0 ? 'claude-code' : 'codex';
+    paneIndex += 1;
+    const active = node.surfaces[node.activeSurfaceIndex];
+    if (!active || active.type !== 'terminal' || active.agentPreset) return node;
+
+    return {
+      ...node,
+      surfaces: node.surfaces.map((surface, index) =>
+        index === node.activeSurfaceIndex ? { ...surface, agentPreset: preset } : surface),
+    };
+  };
+
+  return migrate(tree);
 }
 
 // ─── adjustPaneRatio (issue #64: keyboard pane resize) ───────────────────────

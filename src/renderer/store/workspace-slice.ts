@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import { WorkspaceId, WorkspaceInfo, SplitNode } from '../../shared/types';
-import { createLeaf } from './split-utils';
+import { createLeaf, migrateTerminalPanesToAgentChats } from './split-utils';
 import { killTreeTerminalPtys } from './pty-teardown';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -172,7 +172,7 @@ export const createWorkspaceSlice: StateCreator<WorkspaceSlice> = (set, get) => 
       title: config.title ?? `Workspace ${i + 1}`,
       pinned: config.pinned ?? false,
       shell: config.shell || '',
-      splitTree: config.splitTree ?? createLeaf(),
+      splitTree: migrateTerminalPanesToAgentChats(config.splitTree ?? createLeaf()),
       unreadCount: 0,
       customColor: config.customColor,
       cwd: config.cwd,

@@ -241,7 +241,7 @@ function tryReplaceTabSpawn(event: any, ws: WorkspaceInfo, setAgentMeta: (surfac
   return true;
 }
 
-/** Build the default 3-terminal split layout for new workspaces */
+/** Build the default Claude + Codex conversational workspace. */
 function buildDefaultSplitTree(): SplitNode {
   return {
     type: 'branch',
@@ -249,28 +249,23 @@ function buildDefaultSplitTree(): SplitNode {
     ratio: 0.5,
     children: [
       {
-        type: 'branch',
-        direction: 'horizontal',
-        ratio: 0.5,
-        children: [
-          {
-            type: 'leaf',
-            paneId: `pane-${uuid()}` as PaneId,
-            surfaces: [{ id: `surf-${uuid()}` as SurfaceId, type: 'terminal' }],
-            activeSurfaceIndex: 0,
-          },
-          {
-            type: 'leaf',
-            paneId: `pane-${uuid()}` as PaneId,
-            surfaces: [{ id: `surf-${uuid()}` as SurfaceId, type: 'terminal' }],
-            activeSurfaceIndex: 0,
-          },
-        ],
+        type: 'leaf',
+        paneId: `pane-${uuid()}` as PaneId,
+        surfaces: [{
+          id: `surf-${uuid()}` as SurfaceId,
+          type: 'terminal',
+          agentPreset: 'claude-code',
+        }],
+        activeSurfaceIndex: 0,
       },
       {
         type: 'leaf',
         paneId: `pane-${uuid()}` as PaneId,
-        surfaces: [{ id: `surf-${uuid()}` as SurfaceId, type: 'terminal' }],
+        surfaces: [{
+          id: `surf-${uuid()}` as SurfaceId,
+          type: 'terminal',
+          agentPreset: 'codex',
+        }],
         activeSurfaceIndex: 0,
       },
     ],
